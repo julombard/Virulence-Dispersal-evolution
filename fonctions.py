@@ -16,7 +16,10 @@ rho = Params.rho  # Dispersal Cost
 epsilon = Params.epsilon  # Extinction rate
 
 Possible_alpha_values = list(np.arange(0.01,3, 0.1)) # Here we get values from 1st to 2nd by 3rd
-
+Rounded_alpha_values = []
+for i in Possible_alpha_values :
+    Rounded_alpha_values.append(round(i,2))
+print('possible alphas',Rounded_alpha_values)
 
 def SetMetapop(nbsite, taillepop): #Creates sites objects containing populations
     ListSites=[] # List that will contain all sites
@@ -35,7 +38,7 @@ def SetMetapop(nbsite, taillepop): #Creates sites objects containing populations
             newsite = classes.Site(effectifS=taillepop, effectifI=0)
             for j in range(newsite.effectifI):
                 #newsite.traitvalues.append(float(np.random.uniform(0,1,1)))
-                newsite.traitvalues.append(1.5)
+                newsite.traitvalues.append(1.7)
             newsite.betaI = GetBetaI(newsite.traitvalues)
             ListSites.append(newsite)
     #print(ListSites)
@@ -333,8 +336,7 @@ def ChooseTraitValue(EvolvingTrait,NbTrigger,Statechange, Traitvalues, BetaI) : 
                         #newBetaI.append(NewBeta)
                         # sample the individual that gives birth
                         SumbetaI = sum(newBetaI)  # Get total reproduction propensity
-                        IndividualsProbas = [i / SumbetaI for i in newBetaI]  # Get Individual probability to reproduce
-
+                        IndividualsProbas = [float(i / SumbetaI) for i in newBetaI]  # Get Individual probability to reproduce
                         Reproducer = list(
                             np.random.multinomial(1, IndividualsProbas))  # Choose one ( this return a beta_i)
                         Index_reproducer = Reproducer.index(1)  # Get the index of the reproducer
@@ -342,8 +344,8 @@ def ChooseTraitValue(EvolvingTrait,NbTrigger,Statechange, Traitvalues, BetaI) : 
                         Parent_Value = newtraitsvalues[Index_reproducer] # We get the trait value of the parent
 
                         ChangeMut = [-0.1,0.1]
-                        NewValue = Parent_Value + np.random.choice(ChangeMut, 1)
-                        print('Nouvelle valeur après mutation')
+                        NewValue = round(float(Parent_Value + np.random.choice(ChangeMut, 1)),2)
+                        print('Nouvelle valeur après mutation', Parent_Value, NewValue)
                         newtraitsvalues.append(NewValue)
                         NewbetaValue = beta0 * NewValue / ( NewValue +1)
                         newBetaI.append(NewbetaValue)

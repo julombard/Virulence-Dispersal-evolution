@@ -83,7 +83,7 @@ def RunModel(seed, param) :
 
     # Same for individual values for distributions outputs
     list_distrib_init = []
-    for i in fonctions.Possible_alpha_values:  # For each value defined
+    for i in fonctions.Rounded_alpha_values:  # For each value defined
         count = 0
         for j in ListSites:  # We browse the different sites
             # We count the given value and sum it
@@ -94,7 +94,6 @@ def RunModel(seed, param) :
 
     ############################# Model main Loop ###########
     while sim_time < tmax :
-        print('We have currently passed', sim_time,'time in the simulation') # Kind of a loading bar
         vectime.append(sim_time) #Update time vector
 
         #Compute the propensities
@@ -184,6 +183,7 @@ def RunModel(seed, param) :
                 #print('Occurrences per sites', trigger_persite)
                 #This part apply the effect of events in site populations
                 for index, Site in enumerate(ListSites) :
+
                     if 'Dispersal' in event.name :
                         # Multiply the state change in population by the number of triggers
                         Site.effectifS += trigger_persite[index] * event.Schange
@@ -200,9 +200,9 @@ def RunModel(seed, param) :
 
                             for i in range(trigger_persite[index]):  # for each disperser
                                 if Site.traitvalues:  # In case we remove all trait values during the loop (induces error messages)
-
-                                    disperser = np.random.choice(
-                                        Site.traitvalues)  # Get the value that is to be depleted and added to the receiving site
+                                    #print(type(Site.traitvalues))
+                                    disperser = float(np.random.choice(
+                                        Site.traitvalues))  # Get the value that is to be depleted and added to the receiving site
                                     Index_Disperser = Site.traitvalues.index(disperser)  # Get his corresponding beta
                                     dispersers_traitvalues.append(disperser)
                                     dispersers_beta.append(Site.betaI[Index_Disperser])
@@ -221,7 +221,7 @@ def RunModel(seed, param) :
                         for i in range(SuccessfulMigrants):
                             if Site.traitvalues and abs(event.Ichange) > 0:
                                 # Get trait values of surviving individuals
-                                print(dispersers_traitvalues)
+                                #print(dispersers_traitvalues)
                                 SurvivorTrait = np.random.choice(
                                     dispersers_traitvalues)  # All values are chosen with same probability
                                 Index_survivor = dispersers_traitvalues.index(SurvivorTrait)  # Get index
@@ -282,7 +282,6 @@ def RunModel(seed, param) :
         #Update the output tracking
 
         # 1. Densities
-        print(Densities_out)
         indexlist = 0
         for i in ListSites:
             if i.effectifS < 0:  # Avoid negative population in the "big fat brute" way
@@ -316,7 +315,7 @@ def RunModel(seed, param) :
         # print(SumI, SumS)
         # 4 Count the different phenotypes in the metapopulation, in order to follow their distribution over time
         indexlist3 = 0
-        Possible_values = fonctions.Possible_alpha_values
+        Possible_values = fonctions.Rounded_alpha_values
         list_out_t = []
         for i in Possible_values:  # For each value defined
             count = 0
@@ -328,7 +327,7 @@ def RunModel(seed, param) :
 
     ################ PREPARING THE OUTPUTS #################################################################################
     ################   Structuring outputs to get a .csv file even if the loop has broken ##################################
-    print('COUCOU')
+
     if IsTrackPropensites == True : #if we track propensities
         #Creating propensities dataframe
         dataprop = pd.DataFrame(columns=['t'])
@@ -342,7 +341,8 @@ def RunModel(seed, param) :
         #Saving into .csv file
         dataprop.to_csv('Propensities_outputs_'+str(seed)+'.csv')
 
-    print('BONJOUR',len(vectime), len(Densities_out[1]))
+
+
     #Creating the time series dataframe
     # Creating the time series dataframe
     data = pd.DataFrame(columns=['t'])
@@ -356,7 +356,6 @@ def RunModel(seed, param) :
         if index == 0:
             data[colname] = vectime
         data[colname] = Densities_out[index-1]  # It has to be -1
-    print(data)
     # Saving into .csv file
     data.to_csv('Metapop_OutputsOK_Mutation_EDM' + str(d) + '_' + str(seed) + '.csv')
     print(data)
