@@ -15,7 +15,7 @@ alpha = Params.alpha  # Parasite Virulence
 rho = Params.rho  # Dispersal Cost
 epsilon = Params.epsilon  # Extinction rate
 
-Possible_alpha_values = list(np.arange(0.01,3, 0.1)) # Here we get values from 1st to 2nd by 3rd
+Possible_alpha_values = list(np.arange(0,3, 0.05)) # Here we get values from 1st to 2nd by 3rd
 Rounded_alpha_values = []
 for i in Possible_alpha_values :
     Rounded_alpha_values.append(round(i,2))
@@ -325,7 +325,7 @@ def ChooseTraitValue(EvolvingTrait,NbTrigger,Statechange, Traitvalues, BetaI) : 
         if newtraitsvalues : # If the trait values vector is not empty (important : random sampling can't occur in empty objects)
             if Statechange > 0:  # If it's a birth
                 if EvolvingTrait.TraitMutation == True : # If Mutation is allowed in simulation
-                    probamut = 0.005 # We set a mutation probability (à passer en param global ou en attribut de classe)
+                    probamut = 0.0001 # We set a mutation probability (à passer en param global ou en attribut de classe)
                     roll2mutate = np.random.uniform(0,1,1)
                     if roll2mutate < probamut : #Here there is mutation
                         #Newalpha = float(np.random.uniform(0,1,1)) # sample the new alpha value
@@ -343,7 +343,7 @@ def ChooseTraitValue(EvolvingTrait,NbTrigger,Statechange, Traitvalues, BetaI) : 
 
                         Parent_Value = newtraitsvalues[Index_reproducer] # We get the trait value of the parent
 
-                        ChangeMut = [-0.1,0.1]
+                        ChangeMut = [-0.05,0.05]
                         NewValue = round(float(Parent_Value + np.random.choice(ChangeMut, 1)),2)
                         print('Nouvelle valeur après mutation', Parent_Value, NewValue)
                         newtraitsvalues.append(NewValue)

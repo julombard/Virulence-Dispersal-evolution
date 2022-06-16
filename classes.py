@@ -39,7 +39,7 @@ class Event():
 
     def UpdatePropensity(self, S, I, TraitValues, BetaI): # Class method to compute propensities without creating new objects
         if self.EvolvingTrait.Traitname in self.formula :
-            print('pycharm was here')
+            #print('pycharm was here')
             self.S = S
             self.I = I
             if self.EvolvingTrait.Traitname == 'alpha': # if the evolving trait is virulence
@@ -48,7 +48,7 @@ class Event():
 
                     # Comparaison avec "déterministe"
                     bleu = 1.5* self.I
-                    print('Somme VS Deter :', SumtraitValues, bleu)
+                    #print('Somme VS Deter :', SumtraitValues, bleu)
 
                     self.propensity = SumtraitValues
                 if self.name == 'Infection':
@@ -56,10 +56,10 @@ class Event():
                     #Here we need first to compute the BetaI for each individual as we se a trade-off between alpha and beta
                     #BetaI =fonctions.GetBetaI(TraitValues)
                     #print('COUCOU', BetaI, type(BetaI))
-                    print(len(BetaI), 'VS' ,self.I)
+                    #print(len(BetaI), 'VS' ,self.I)
                     SumBetaI = sum(BetaI)
                     rouge = (0.025* 1.5 /2.5) * self.I
-                    print('Somme VS Deter II :', SumBetaI, rouge)
+                    #print('Somme VS Deter II :', SumBetaI, rouge)
                     self.propensity = SumBetaI * self.S #Proper calculation of propensity with individual beta
         else : #Otherwise take the fixed value given
             #print(self.name)

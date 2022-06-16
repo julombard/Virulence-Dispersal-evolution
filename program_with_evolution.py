@@ -30,6 +30,7 @@ def RunModel(seed, param) :
     fonctions.d = param
 
     # Stocker les sorties dans un dictionnaire
+    dico_densities_df = {}
     dico_distrib_df = {}
     dico_traits_df = {}
 
@@ -38,9 +39,9 @@ def RunModel(seed, param) :
     np.random.seed(seed) #Set seed for reproducibility
     sim_time = 0 # Simulation time (model time, not an iteration number)
     vectime = [0] # to keep t variable
-    tmax = 100 # Ending time
+    tmax = 0.8 # Ending time
     Nexactsteps = 20  # Number of steps to do if/when performing direct method
-    nbsite = 40 # Number de sites
+    nbsite = 100 # Number de sites
     Taillepop = Params.k # Initial local population sizes
 
     Evoltrait = classes.EvolvingTrait('alpha', True)
@@ -62,7 +63,6 @@ def RunModel(seed, param) :
     Events = [ReproductionS,Infection, DispersalI, DispersalS, DeathS, DeathI,Recovery, Extinction]
 
     #Initializing outputs storage
-    Densities_out = [] # Collect densities outputs
     Propensities_out =[] # Collect propensities outputs
     IsTrackPropensites = False #Set false/ true to not track/track propensities
     for i in range(len(Events)):
@@ -72,23 +72,19 @@ def RunModel(seed, param) :
     # We want to get one list per Sx(t) and Ix(t) to store them easily in a dataframe at the end
     list_trait_site = []
     for index, i in enumerate(ListSites):
-        Densities_out.append([i.effectifS])
-        Densities_out.append([i.effectifI])
+        dico_densities_df[f"S{index}"]= [i.effectifS]
+        dico_densities_df[f"I{index}"]= [i.effectifI]
         if i.effectifI > 0:
-            list_trait_site.append(sum(i.traitvalues) / i.effectifI)
             dico_traits_df[f"site{index}"] = [sum(i.traitvalues) / i.effectifI]
         else:
-            list_trait_site.append('NA')
             dico_traits_df[f"site{index}"] = ["NA"]
 
     # Same for individual values for distributions outputs
-    list_distrib_init = []
     for i in fonctions.Rounded_alpha_values:  # For each value defined
         count = 0
         for j in ListSites:  # We browse the different sites
             # We count the given value and sum it
             count += j.traitvalues.count(i)
-        list_distrib_init.append(count)
         dico_distrib_df[f"Alpha{i}"] = [count]
 
 
@@ -283,14 +279,14 @@ def RunModel(seed, param) :
 
         # 1. Densities
         indexlist = 0
-        for i in ListSites:
+        for index, i in enumerate(ListSites):
             if i.effectifS < 0:  # Avoid negative population in the "big fat brute" way
                 i.effectifS = 0
-            Densities_out[indexlist].append(i.effectifS)
+            dico_densities_df[f"S{index}"].append(i.effectifS)
             indexlist += 1
             if i.effectifI < 0:
                 i.effectifI = 0
-            Densities_out[indexlist].append(i.effectifI)
+            dico_densities_df[f"I{index}"].append(i.effectifI)
             indexlist += 1
         #2. Propensities
         if IsTrackPropensites == True :
@@ -339,45 +335,29 @@ def RunModel(seed, param) :
             if index == 0 : dataprop[colname] = vectime
             else : dataprop[colname] = Propensities_out[index-1]
         #Saving into .csv file
-        dataprop.to_csv('Propensities_outputs_'+str(seed)+'.csv')
+        dataprop.to_csv('Propensities_outputs_LongRun_Step005'+str(seed)+'.csv')
 
 
 
     #Creating the time series dataframe
-    # Creating the time series dataframe
-    data = pd.DataFrame(columns=['t'])
-    for i in range(nbsite):  # Define a column for each subpop and site index
-        colname_s = 'S' + str(i)
-        colname_i = 'I' + str(i)
-        data[colname_s] = []
-        data[colname_i] = []
-    # Filling the dataframe
-    for index, colname in enumerate(data):
-        if index == 0:
-            data[colname] = vectime
-        data[colname] = Densities_out[index-1]  # It has to be -1
-    # Saving into .csv file
-    data.to_csv('Metapop_OutputsOK_Mutation_EDM' + str(d) + '_' + str(seed) + '.csv')
-    print(data)
-    # Strange, csv is saved in model directory on lab computer but in User/Appdata/local/temp on personal computer...
-
+    datadensity = pd.DataFrame.from_dict(data=dico_densities_df)
+    VectimeDf = pd.DataFrame(data=vectime)
+    datadensity.insert(0, "Time", VectimeDf, allow_duplicates=False)
+    datadensity.to_csv('Metapop_Outputs_LongRunStep005' + str(d) + '_' + str(seed) + '.csv')
     # Creating Mean trait dataframe
     datatrait = pd.DataFrame.from_dict(data=dico_traits_df)
-    VectimeDf = pd.DataFrame(data=vectime)
     datatrait.insert(0, 'Time', VectimeDf, allow_duplicates=False)
-    datatrait.to_csv('Traits_outputsTDoff_MutationOK_EDM' + str(d) + '_' + str(seed) + '.csv')
-
+    datatrait.to_csv('Traits_outputs_LongRunStep005' + str(d) + '_' + str(seed) + '.csv')
     # Creating distribution dataframe
     datadistrib = pd.DataFrame.from_dict(data=dico_distrib_df)
-    VectimeDf = pd.DataFrame(data=vectime)
     datadistrib.insert(0, 'Time', VectimeDf, allow_duplicates=False)
-    datadistrib.to_csv('Distribution_outputsTDoffOK_Mutation_EDM' + str(d) + '_' + str(seed) + '.csv')
+    datadistrib.to_csv('Distribution_outputs_LongRunStep005' + str(d) + '_' + str(seed) + '.csv')
 
 ################### MULTIPROCESSING PART ###########
 
 
 # Paramètres de multiprocessing
-list_seeds = [3]
+list_seeds = [1]
 list_params =[1]
 nbsims = len(list_seeds)
 
@@ -390,7 +370,7 @@ if __name__ == '__main__':
     pool = multiprocessing.Pool(processes=CPUnb) # Je ne sais pas trop ce que ça fait
     for j in range(len(list_params)) :
         for i in range(nbsims):
-            #pool.apply_async(RunModel, args=(list_seeds[i],list_params[j])) #Lance CPUnb simulations en meme temps, lorsqu'une simulation se termine elle est immediatement remplacee par la suivante
-            RunModel(list_seeds[i],list_params[j]) #pour debug hors multisim (messages d'ereur visible)
+            pool.apply_async(RunModel, args=(list_seeds[i],list_params[j])) #Lance CPUnb simulations en meme temps, lorsqu'une simulation se termine elle est immediatement remplacee par la suivante
+            #RunModel(list_seeds[i],list_params[j]) #pour debug hors multisim (messages d'ereur visible)
     pool.close()
     pool.join()
