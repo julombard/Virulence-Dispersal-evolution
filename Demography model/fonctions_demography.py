@@ -1,5 +1,5 @@
 # Stochastic Simulation Algorithm for Metapopulation models
-import classes
+import classes_demography
 import numpy as np
 from copy import deepcopy
 
@@ -7,10 +7,10 @@ def SetMetapop(nbsite, taillepop): #Creates sites objects containing populations
     ListSites=[] # List that will contain all sites
     for i in range(nbsite): # Creates sites, the 1st will always contain one infected and the other 0
         if i == 0:
-            newsite = classes.Site(effectifS=taillepop-5, effectifI=5)
+            newsite = classes_demography.Site(effectifS=taillepop-1, effectifI=1)
             ListSites.append(newsite)
         else:
-            newsite = classes.Site(effectifS=taillepop, effectifI=0)
+            newsite = classes_demography.Site(effectifS=taillepop, effectifI=0)
             ListSites.append(newsite)
     print(ListSites)
     return ListSites

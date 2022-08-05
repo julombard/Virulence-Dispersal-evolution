@@ -1,13 +1,13 @@
 #Model parameters
-beta0 = 0.025  #Infectious contact rate
+beta0 = 1  #Infectious contact rate
 bi = 2  #Per capita birth rate
 di = 0.5 #Per capita natural death rate
 omega = 1 - (di /bi) # Strength of density dependance on natality
-k = 1000  #Carrying capacity
-d = 1  #Dispersal propensity
-gamma = 1.5  #Parasite Clearance
-alpha = 1.5  #Parasite Virulence
-rho = 0 #Dispersal Cost
+k = 100  #Carrying capacity
+d = 0.5  #Dispersal propensity
+gamma = 2.5  #Parasite Clearance
+alpha = 0.2  #Parasite Virulence
+rho = 0.9 #Dispersal Cost
 epsilon = 0.1 #Extinction rate
 
 class Site(): #Site object containing (non explicit) individuals
@@ -24,7 +24,7 @@ class Event():
         self.S = 0 #Has to take density values to understand the maths
         self.I = 0
         self.formula = propensity # The unique formule (str) given by model construction
-        self.propensity = eval(self.formula)#Convert string in maths instruction, very useful to externalise model building
+        self.propensity = 0#Convert string in maths instruction, very useful to externalise model building
         self.Ichange = eval(Ichange) # State Change due to event, Typically -1, 0, 1 except for extinctions
         self.Schange = eval(Schange)
         self.order = order # Reaction order, not really useful but we never know
@@ -32,5 +32,8 @@ class Event():
     def UpdatePropensity(self, S, I): # Class method to compute propensities without creating new objects
         self.S = S
         self.I = I
-        self.propensity = eval(self.formula) # Changes propensity values while keeping formula untouched
+        if self.S > 0 or self.I > 0 :
+            self.propensity = eval(self.formula) #Convert string in maths instruction, very useful to externalise model building
+        else :
+            self.propensity = 0
         return self.propensity

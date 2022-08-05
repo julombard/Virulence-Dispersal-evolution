@@ -11,7 +11,7 @@ import pandas as pd
 #Damn efficient compared to previous try (on lab laptop 100 sites simulated over 16K iterations took 2'30)
 
 #Simulation parameters
-seed = 3
+seed = 4
 
 np.random.seed(seed) #Set seed for reproducibility
 sim_time = 0 # Simulation time (model time, not an iteration number)
@@ -19,18 +19,18 @@ vectime = [0] # to keep t variable
 tmax = 30 # Ending time
 Nexactsteps = 20  # Number of steps to do if/when performing direct method
 nbsite = 40 # Number de sites
-Taillepop = 1000 # Initial local population sizes
+Taillepop = 100 # Initial local population sizes
 
 #Model parameters
-beta0 = 0.025  #Infectious contact rate
+beta0 = 1  #Infectious contact rate
 bi = 2  #Per capita birth rate
 di = 0.5 #Per capita natural death rate
 omega = 1 - (di /bi) # Strength of density dependance on natality
-k = 1000  #Carrying capacity
-d = 1  #Dispersal propensity
-gamma = 1.5  #Parasite Clearance
-alpha = 1.5  #Parasite Virulence
-rho = 0 #Dispersal Cost
+k = 100  #Carrying capacity
+d = 0.5  #Dispersal propensity
+gamma = 2.5  #Parasite Clearance
+alpha = 0.2  #Parasite Virulence
+rho = 0.9 #Dispersal Cost
 epsilon = 0.1 #Extinction rate
 
 #Define population as class instances
@@ -43,9 +43,9 @@ DeathS = classes_demography.Event(name='Death S',propensity='di*self.S', Schange
 DispersalS = classes_demography.Event(name='Dispersal S',propensity='d*self.S', Schange='-1', Ichange='0', order=1)
 DispersalI = classes_demography.Event(name='Dispersal I',propensity='d*self.I', Schange='0', Ichange='-1', order=1)
 Extinction = classes_demography.Event(name='Extinction',propensity='epsilon', Schange='-self.S', Ichange='-self.I', order=0)
-Infection = classes_demography.Event(name='Infection',propensity='beta0 *(alpha / (1+alpha) )*self.S*self.I', Schange='-1', Ichange='1', order=2)
+Infection = classes_demography.Event(name='Infection',propensity='(beta0 *alpha / (1+alpha))*self.S*self.I ', Schange='-1', Ichange='1', order=2)
 Recovery = classes_demography.Event(name='Recovery',propensity='gamma*self.I', Schange='1', Ichange='-1', order=1)
-DeathI = classes_demography.Event(name='Death I',propensity='alpha*self.I', Schange='0', Ichange='-1', order=1)
+DeathI = classes_demography.Event(name='Death I',propensity='(di + alpha) *self.I', Schange='0', Ichange='-1', order=1)
 
 #Event vector, cause tidying up things is always nice
 Events = [ReproductionS,Infection, DispersalI, DispersalS, DeathS, DeathI,Recovery, Extinction]
@@ -73,7 +73,7 @@ while sim_time < tmax :
 
     #Compute the propensities
     Propensities, Sum_propensities = fonctions_demography.GetPropensites(ListSites, Events) # Get a vector of propensities ordered by event and by sites
-    #print("Propensities", Propensities)
+    print("Propensities", Propensities)
     SumS, SumI = fonctions_demography.SumDensities(ListSites) # Get total densities of species
 
     #print('Les props', Propensities)
@@ -135,9 +135,6 @@ while sim_time < tmax :
             Noccur = triggers[index] #We get the number of times it should trigger during tau
             props = Propensities[index] # We get the propensity per sites
 
-            if event.name == "Infection" or "Death I" :
-                print(event.name)
-                print('site propensities',props)
             SumProp = sum(props) # We get the total propensity
             Probas = [i /SumProp for i in props] # We get probability of occurence in each site
             #print('les probas', Probas) #Good job boy

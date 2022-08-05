@@ -16,7 +16,7 @@ bi = Params.bi  # Per capita net growth rate
 di = Params.di # Per capita natural death rate
 omega = Params.omega # Strength of density dependance on births
 k = Params.k  # Carrying capacity
-d = 1# Dispersal propensity
+d = 0.5# Dispersal propensity
 gamma = Params.gamma  # Parasite Clearance
 alpha = Params.alpha  # Parasite Virulence
 rho = Params.rho  # Dispersal Cost
@@ -39,25 +39,25 @@ def RunModel(seed, param) :
     np.random.seed(seed) #Set seed for reproducibility
     sim_time = 0 # Simulation time (model time, not an iteration number)
     vectime = [0] # to keep t variable
-    tmax = 0.8 # Ending time
+    tmax = 30 # Ending time
     Nexactsteps = 20  # Number of steps to do if/when performing direct method
     nbsite = 100 # Number de sites
     Taillepop = Params.k # Initial local population sizes
 
-    Evoltrait = classes.EvolvingTrait('alpha', True)
+    Evoltrait = classes.EvolvingTrait('alpha', False)
     #Define population as class instances
     ListSites = fonctions.SetMetapop(nbsite, Taillepop)
 
     #Event definition
     #Further expansion idea : build events from a unique model.txt file read by the program, in order to simulate whathever you want
-    ReproductionS = classes.Event(name='Reproduction S',propensity='bi*(1- omega * (self.S+self.I)/k) * self.S', Schange='1', Ichange='0', order=1,EvolvingTrait=Evoltrait)
+    ReproductionS = classes.Event(name='Reproduction S',propensity='(bi - omega * (self.S+self.I) ) * self.S', Schange='1', Ichange='0', order=1,EvolvingTrait=Evoltrait)
     DeathS = classes.Event(name='Death S',propensity='di*self.S', Schange='-1', Ichange='0', order=3,EvolvingTrait=Evoltrait)
     DispersalS = classes.Event(name='Dispersal S',propensity='d*self.S', Schange='-1', Ichange='0', order=1,EvolvingTrait=Evoltrait)
     DispersalI = classes.Event(name='Dispersal I',propensity='d*self.I', Schange='0', Ichange='-1', order=1,EvolvingTrait=Evoltrait)
     Extinction = classes.Event(name='Extinction',propensity='epsilon', Schange='-self.S', Ichange='-self.I', order=0,EvolvingTrait=Evoltrait)
     Infection = classes.Event(name='Infection',propensity='beta0 *(alpha / (1+alpha) )*self.S*self.I', Schange='-1', Ichange='1', order=2,EvolvingTrait=Evoltrait)
     Recovery = classes.Event(name='Recovery',propensity='gamma*self.I', Schange='1', Ichange='-1', order=1,EvolvingTrait=Evoltrait)
-    DeathI = classes.Event(name='Death I',propensity='alpha*self.I', Schange='0', Ichange='-1', order=1,EvolvingTrait=Evoltrait)
+    DeathI = classes.Event(name='Death I',propensity='(di + alpha) *self.I', Schange='0', Ichange='-1', order=1,EvolvingTrait=Evoltrait)
 
     #Event vector, cause tidying up things is always nice
     Events = [ReproductionS,Infection, DispersalI, DispersalS, DeathS, DeathI,Recovery, Extinction]
@@ -96,7 +96,6 @@ def RunModel(seed, param) :
         Propensities, Sum_propensities = fonctions.GetPropensites(ListSites, Events) # Get a vector of propensities ordered by event and by sites
         #print("Propensities", Propensities)
         SumS, SumI = fonctions.SumDensities(ListSites) # Get total densities of species
-
         # Break the main loop if there are no infected remaining ( this happens essentially at start if the 1st infected dies)
         # print('SOMME I', SumI)
         if SumI == 0:
@@ -308,7 +307,7 @@ def RunModel(seed, param) :
                 list_value.append(MeanTraitValue)
                 dico_traits_df[f"site{index}"].append(MeanTraitValue)
         # print(Traits_Values_Out)
-        # print(SumI, SumS)
+
         # 4 Count the different phenotypes in the metapopulation, in order to follow their distribution over time
         indexlist3 = 0
         Possible_values = fonctions.Rounded_alpha_values
@@ -343,22 +342,22 @@ def RunModel(seed, param) :
     datadensity = pd.DataFrame.from_dict(data=dico_densities_df)
     VectimeDf = pd.DataFrame(data=vectime)
     datadensity.insert(0, "Time", VectimeDf, allow_duplicates=False)
-    datadensity.to_csv('Metapop_Outputs_LongRunStep005' + str(d) + '_' + str(seed) + '.csv')
+    datadensity.to_csv('Metapop_Outputs_Coex' + str(d) + '_' + str(seed) + '.csv')
     # Creating Mean trait dataframe
     datatrait = pd.DataFrame.from_dict(data=dico_traits_df)
     datatrait.insert(0, 'Time', VectimeDf, allow_duplicates=False)
-    datatrait.to_csv('Traits_outputs_LongRunStep005' + str(d) + '_' + str(seed) + '.csv')
+    datatrait.to_csv('Traits_outputs_Coex' + str(d) + '_' + str(seed) + '.csv')
     # Creating distribution dataframe
     datadistrib = pd.DataFrame.from_dict(data=dico_distrib_df)
     datadistrib.insert(0, 'Time', VectimeDf, allow_duplicates=False)
-    datadistrib.to_csv('Distribution_outputs_LongRunStep005' + str(d) + '_' + str(seed) + '.csv')
+    datadistrib.to_csv('Distribution_outputs_Coex' + str(d) + '_' + str(seed) + '.csv')
 
 ################### MULTIPROCESSING PART ###########
 
 
 # Paramètres de multiprocessing
-list_seeds = [1]
-list_params =[1]
+list_seeds = [11,1,2,3,4,5,6,7,8,9,10]
+list_params =[0.5]
 nbsims = len(list_seeds)
 
 #Lancer un batch de nbsims simulations

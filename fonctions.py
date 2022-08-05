@@ -9,13 +9,13 @@ bi = Params.bi  # Per capita net growth rate
 di = Params.di # Per capita natural death rate
 omega = Params.omega # Strength of density dependance on births
 k = Params.k  # Carrying capacity
-d = 1 # Dispersal propensity
+d = 0.5 # Dispersal propensity
 gamma = Params.gamma  # Parasite Clearance
 alpha = Params.alpha  # Parasite Virulence
 rho = Params.rho  # Dispersal Cost
 epsilon = Params.epsilon  # Extinction rate
 
-Possible_alpha_values = list(np.arange(0,3, 0.05)) # Here we get values from 1st to 2nd by 3rd
+Possible_alpha_values = list(np.arange(0,1, 0.05)) # Here we get values from 1st to 2nd by 3rd
 Rounded_alpha_values = []
 for i in Possible_alpha_values :
     Rounded_alpha_values.append(round(i,2))
@@ -25,23 +25,28 @@ def SetMetapop(nbsite, taillepop): #Creates sites objects containing populations
     ListSites=[] # List that will contain all sites
     for i in range(nbsite): # Creates sites, the 1st will always contain one infected and the other 0
         if i == 0:
-            newsite = classes.Site(effectifS=taillepop-5, effectifI=5)
+            newsite = classes.Site(effectifS=taillepop-200, effectifI=200)
             # Assign to each initialised infected individual a trait value for alpha
             for j in range(newsite.effectifI):
                 # newsite.traitvalues.append(float(np.random.uniform(0,1,1))) # For random sample from a given law, here uniform
-                newsite.traitvalues.append(1.7)  # For sampling from predefined trait vector
+                newsite.traitvalues.append(0.55)  # For sampling from predefined trait vector
             newsite.betaI = GetBetaI(newsite.traitvalues)
-
-
-            ListSites.append(newsite)
+            #ListSites.append(newsite)
+        elif i == 1:
+            newsite = classes.Site(effectifS=taillepop-200, effectifI=200)
+            # Assign to each initialised infected individual a trait value for alpha
+            for j in range(newsite.effectifI):
+                # newsite.traitvalues.append(float(np.random.uniform(0,1,1))) # For random sample from a given law, here uniform
+                newsite.traitvalues.append(0.35)  # For sampling from predefined trait vector
+            newsite.betaI = GetBetaI(newsite.traitvalues)
+            #ListSites.append(newsite)
         else:
             newsite = classes.Site(effectifS=taillepop, effectifI=0)
             for j in range(newsite.effectifI):
                 #newsite.traitvalues.append(float(np.random.uniform(0,1,1)))
-                newsite.traitvalues.append(1.7)
+                newsite.traitvalues.append(0.5)
             newsite.betaI = GetBetaI(newsite.traitvalues)
-            ListSites.append(newsite)
-    #print(ListSites)
+        ListSites.append(newsite)
     return ListSites
 
 def GetPropensites (Sites, Events): # Compute the propensities
@@ -325,7 +330,7 @@ def ChooseTraitValue(EvolvingTrait,NbTrigger,Statechange, Traitvalues, BetaI) : 
         if newtraitsvalues : # If the trait values vector is not empty (important : random sampling can't occur in empty objects)
             if Statechange > 0:  # If it's a birth
                 if EvolvingTrait.TraitMutation == True : # If Mutation is allowed in simulation
-                    probamut = 0.0001 # We set a mutation probability (à passer en param global ou en attribut de classe)
+                    probamut = 0.001 # We set a mutation probability (à passer en param global ou en attribut de classe)
                     roll2mutate = np.random.uniform(0,1,1)
                     if roll2mutate < probamut : #Here there is mutation
                         #Newalpha = float(np.random.uniform(0,1,1)) # sample the new alpha value
