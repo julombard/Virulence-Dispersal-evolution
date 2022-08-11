@@ -2,7 +2,7 @@
 beta0 = 1  #Infectious contact rate
 bi = 2  #Per capita birth rate
 di = 0.5 #Per capita natural death rate
-k = 1000  #Carrying capacity
+k = 200  #Carrying capacity
 omega = (bi -di) / k # Strength of density dependance on natality
 gamma = 2.5  #Parasite Clearance
 alpha = 1.5  #Parasite Virulence

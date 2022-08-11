@@ -15,7 +15,7 @@ alpha = Params.alpha  # Parasite Virulence
 rho = Params.rho  # Dispersal Cost
 epsilon = Params.epsilon  # Extinction rate
 
-Possible_alpha_values = list(np.arange(0,1, 0.05)) # Here we get values from 1st to 2nd by 3rd
+Possible_alpha_values = list(np.arange(0,1, 0.01)) # Here we get values from 1st to 2nd by 3rd
 Rounded_alpha_values = []
 for i in Possible_alpha_values :
     Rounded_alpha_values.append(round(i,2))
@@ -25,26 +25,26 @@ def SetMetapop(nbsite, taillepop): #Creates sites objects containing populations
     ListSites=[] # List that will contain all sites
     for i in range(nbsite): # Creates sites, the 1st will always contain one infected and the other 0
         if i == 0:
-            newsite = classes.Site(effectifS=taillepop-200, effectifI=200)
+            newsite = classes.Site(effectifS=25, effectifI=13)
             # Assign to each initialised infected individual a trait value for alpha
             for j in range(newsite.effectifI):
                 # newsite.traitvalues.append(float(np.random.uniform(0,1,1))) # For random sample from a given law, here uniform
-                newsite.traitvalues.append(0.55)  # For sampling from predefined trait vector
+                newsite.traitvalues.append(0.15)  # For sampling from predefined trait vector
             newsite.betaI = GetBetaI(newsite.traitvalues)
             #ListSites.append(newsite)
-        elif i == 1:
-            newsite = classes.Site(effectifS=taillepop-200, effectifI=200)
+        #elif i == 1:
+            #newsite = classes.Site(effectifS=taillepop-200, effectifI=200)
             # Assign to each initialised infected individual a trait value for alpha
-            for j in range(newsite.effectifI):
+            #for j in range(newsite.effectifI):
                 # newsite.traitvalues.append(float(np.random.uniform(0,1,1))) # For random sample from a given law, here uniform
-                newsite.traitvalues.append(0.35)  # For sampling from predefined trait vector
-            newsite.betaI = GetBetaI(newsite.traitvalues)
+                #newsite.traitvalues.append(0.35)  # For sampling from predefined trait vector
+            #newsite.betaI = GetBetaI(newsite.traitvalues)
             #ListSites.append(newsite)
         else:
-            newsite = classes.Site(effectifS=taillepop, effectifI=0)
+            newsite = classes.Site(effectifS=25, effectifI=13)
             for j in range(newsite.effectifI):
                 #newsite.traitvalues.append(float(np.random.uniform(0,1,1)))
-                newsite.traitvalues.append(0.5)
+                newsite.traitvalues.append(0.15)
             newsite.betaI = GetBetaI(newsite.traitvalues)
         ListSites.append(newsite)
     return ListSites
@@ -348,7 +348,7 @@ def ChooseTraitValue(EvolvingTrait,NbTrigger,Statechange, Traitvalues, BetaI) : 
 
                         Parent_Value = newtraitsvalues[Index_reproducer] # We get the trait value of the parent
 
-                        ChangeMut = [-0.05,0.05]
+                        ChangeMut = [-0.01,0.01]
                         NewValue = round(float(Parent_Value + np.random.choice(ChangeMut, 1)),2)
                         print('Nouvelle valeur après mutation', Parent_Value, NewValue)
                         newtraitsvalues.append(NewValue)

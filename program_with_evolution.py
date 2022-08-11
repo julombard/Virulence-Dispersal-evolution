@@ -39,12 +39,12 @@ def RunModel(seed, param) :
     np.random.seed(seed) #Set seed for reproducibility
     sim_time = 0 # Simulation time (model time, not an iteration number)
     vectime = [0] # to keep t variable
-    tmax = 30 # Ending time
+    tmax = 3000 # Ending time
     Nexactsteps = 20  # Number of steps to do if/when performing direct method
     nbsite = 100 # Number de sites
     Taillepop = Params.k # Initial local population sizes
 
-    Evoltrait = classes.EvolvingTrait('alpha', False)
+    Evoltrait = classes.EvolvingTrait('alpha', True)
     #Define population as class instances
     ListSites = fonctions.SetMetapop(nbsite, Taillepop)
 
@@ -342,21 +342,21 @@ def RunModel(seed, param) :
     datadensity = pd.DataFrame.from_dict(data=dico_densities_df)
     VectimeDf = pd.DataFrame(data=vectime)
     datadensity.insert(0, "Time", VectimeDf, allow_duplicates=False)
-    datadensity.to_csv('Metapop_Outputs_Coex' + str(d) + '_' + str(seed) + '.csv')
+    datadensity.to_csv('Metapop_Outputs_Branch_t3000' + str(d) + '_' + str(seed) + '.csv')
     # Creating Mean trait dataframe
     datatrait = pd.DataFrame.from_dict(data=dico_traits_df)
     datatrait.insert(0, 'Time', VectimeDf, allow_duplicates=False)
-    datatrait.to_csv('Traits_outputs_Coex' + str(d) + '_' + str(seed) + '.csv')
+    datatrait.to_csv('Traits_outputs_Branch_t3000' + str(d) + '_' + str(seed) + '.csv')
     # Creating distribution dataframe
     datadistrib = pd.DataFrame.from_dict(data=dico_distrib_df)
     datadistrib.insert(0, 'Time', VectimeDf, allow_duplicates=False)
-    datadistrib.to_csv('Distribution_outputs_Coex' + str(d) + '_' + str(seed) + '.csv')
+    datadistrib.to_csv('Distribution_outputs_Branch_t3000' + str(d) + '_' + str(seed) + '.csv')
 
 ################### MULTIPROCESSING PART ###########
 
 
 # Paramètres de multiprocessing
-list_seeds = [11,1,2,3,4,5,6,7,8,9,10]
+list_seeds = [1,2,3,4,5,6,7,8,9,10,11,12]
 list_params =[0.5]
 nbsims = len(list_seeds)
 
