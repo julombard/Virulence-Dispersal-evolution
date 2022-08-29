@@ -37,11 +37,12 @@ def RunModel(seed, param) :
     # Simulation parameters
     print('Seed', seed)
     np.random.seed(seed) #Set seed for reproducibility
+    nb_iterations = 0 #Store the number of interations to define times that are saved (later)
     sim_time = 0 # Simulation time (model time, not an iteration number)
     vectime = [0] # to keep t variable
-    tmax = 3000 # Ending time
+    tmax = 10 # Ending time
     Nexactsteps = 20  # Number of steps to do if/when performing direct method
-    nbsite = 100 # Number de sites
+    nbsite = 40 # Number de sites
     Taillepop = Params.k # Initial local population sizes
 
     Evoltrait = classes.EvolvingTrait('alpha', True)
@@ -90,7 +91,8 @@ def RunModel(seed, param) :
 
     ############################# Model main Loop ###########
     while sim_time < tmax :
-        vectime.append(sim_time) #Update time vector
+        if nb_iterations % 10 == 0:
+            vectime.append(sim_time) #Update time vector
 
         #Compute the propensities
         Propensities, Sum_propensities = fonctions.GetPropensites(ListSites, Events) # Get a vector of propensities ordered by event and by sites
@@ -141,7 +143,7 @@ def RunModel(seed, param) :
 
 
             ### UPDATE 9.06.2022 : Here we sample FOR EACH site in a poisson distribuion #####
-            Propensities_per_site, Sum_propensities_per_site = fonctions.GetPropensites_Per_sites(ListSites, Events)
+            #Propensities_per_site, Sum_propensities_per_site = fonctions.GetPropensites_Per_sites(ListSites, Events)
 
 
             #Now we sample the kjs in poisson law, aka the number of trigger of each event
@@ -229,6 +231,8 @@ def RunModel(seed, param) :
                             del index_sites[
                                 index]  # Drop the current site from the list cause you can't emigrate to the place from which you departed
 
+                            ### CHANGE THIS PART FOR TESTING OTHER SPATIAL CONFIGS ####
+
                             Index_destination = np.random.choice(index_sites)  # Get index of destination site
 
                             #Add individual to destination
@@ -281,11 +285,14 @@ def RunModel(seed, param) :
         for index, i in enumerate(ListSites):
             if i.effectifS < 0:  # Avoid negative population in the "big fat brute" way
                 i.effectifS = 0
-            dico_densities_df[f"S{index}"].append(i.effectifS)
+            if nb_iterations % 10 == 0 :
+                print('Saving...')
+                dico_densities_df[f"S{index}"].append(i.effectifS)
             indexlist += 1
             if i.effectifI < 0:
                 i.effectifI = 0
-            dico_densities_df[f"I{index}"].append(i.effectifI)
+            if nb_iterations % 10 == 0:
+                dico_densities_df[f"I{index}"].append(i.effectifI)
             indexlist += 1
         #2. Propensities
         if IsTrackPropensites == True :
@@ -300,26 +307,31 @@ def RunModel(seed, param) :
 
                 SumTraitValues = sum(i.traitvalues)
                 MeanTraitValue = SumTraitValues / i.effectifI
-                dico_traits_df[f"site{index}"].append(MeanTraitValue)
+                if nb_iterations % 10 == 0:
+                    dico_traits_df[f"site{index}"].append(MeanTraitValue)
                 indexlist2 += 1
             else:
                 MeanTraitValue = 'NA'
                 list_value.append(MeanTraitValue)
-                dico_traits_df[f"site{index}"].append(MeanTraitValue)
+                if nb_iterations % 10 == 0:
+                    dico_traits_df[f"site{index}"].append(MeanTraitValue)
         # print(Traits_Values_Out)
 
         # 4 Count the different phenotypes in the metapopulation, in order to follow their distribution over time
         indexlist3 = 0
         Possible_values = fonctions.Rounded_alpha_values
-        list_out_t = []
+        #list_out_t = []
         for i in Possible_values:  # For each value defined
             count = 0
-            for j in ListSites:  # We browse the different sites
-                # We count the given value and sum it
-                count += j.traitvalues.count(i)
-            dico_distrib_df[f"Alpha{i}"].append(count)
-            list_out_t.append(count)
-
+            if nb_iterations % 10 == 0:
+                for j in ListSites:  # We browse the different sites
+                    # We count the given value and sum it
+                    count += j.traitvalues.count(i)
+                dico_distrib_df[f"Alpha{i}"].append(count)
+            #list_out_t.append(count)
+            #print('CE TRUC ?', list_out_t)
+        nb_iterations += 1
+        print("Iterations", nb_iterations)
     ################ PREPARING THE OUTPUTS #################################################################################
     ################   Structuring outputs to get a .csv file even if the loop has broken ##################################
 
@@ -356,7 +368,7 @@ def RunModel(seed, param) :
 
 
 # Paramètres de multiprocessing
-list_seeds = [1,2,3,4,5,6,7,8,9,10,11,12]
+list_seeds = [1]
 list_params =[0.5]
 nbsims = len(list_seeds)
 
@@ -369,7 +381,7 @@ if __name__ == '__main__':
     pool = multiprocessing.Pool(processes=CPUnb) # Je ne sais pas trop ce que ça fait
     for j in range(len(list_params)) :
         for i in range(nbsims):
-            pool.apply_async(RunModel, args=(list_seeds[i],list_params[j])) #Lance CPUnb simulations en meme temps, lorsqu'une simulation se termine elle est immediatement remplacee par la suivante
-            #RunModel(list_seeds[i],list_params[j]) #pour debug hors multisim (messages d'ereur visible)
+            #pool.apply_async(RunModel, args=(list_seeds[i],list_params[j])) #Lance CPUnb simulations en meme temps, lorsqu'une simulation se termine elle est immediatement remplacee par la suivante
+            RunModel(list_seeds[i],list_params[j]) #pour debug hors multisim (messages d'ereur visible)
     pool.close()
     pool.join()
