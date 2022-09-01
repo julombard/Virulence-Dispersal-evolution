@@ -29,7 +29,10 @@ def SetMetapop(nbsite, taillepop): #Creates sites objects containing populations
             # Assign to each initialised infected individual a trait value for alpha
             for j in range(newsite.effectifI):
                 # newsite.traitvalues.append(float(np.random.uniform(0,1,1))) # For random sample from a given law, here uniform
-                newsite.traitvalues.append(0.15)  # For sampling from predefined trait vector
+                sampled_trait = float(np.random.normal(0.15,0.02,1))
+                print(sampled_trait, "COUCOU")
+                newsite.traitvalues.append(round(sampled_trait,2)) # For random sample from a given law, here normal
+                #newsite.traitvalues.append(0.15)  # For sampling from predefined trait vector
             newsite.betaI = GetBetaI(newsite.traitvalues)
             #ListSites.append(newsite)
         #elif i == 1:
@@ -44,7 +47,9 @@ def SetMetapop(nbsite, taillepop): #Creates sites objects containing populations
             newsite = classes.Site(effectifS=25, effectifI=13)
             for j in range(newsite.effectifI):
                 #newsite.traitvalues.append(float(np.random.uniform(0,1,1)))
-                newsite.traitvalues.append(0.15)
+                sampled_trait = float(np.random.normal(0.15, 0.02, 1))
+                newsite.traitvalues.append(round(sampled_trait, 2))  # For random sample from a given law, here normal
+                #newsite.traitvalues.append(0.15)
             newsite.betaI = GetBetaI(newsite.traitvalues)
         ListSites.append(newsite)
     return ListSites
@@ -330,7 +335,7 @@ def ChooseTraitValue(EvolvingTrait,NbTrigger,Statechange, Traitvalues, BetaI) : 
         if newtraitsvalues : # If the trait values vector is not empty (important : random sampling can't occur in empty objects)
             if Statechange > 0:  # If it's a birth
                 if EvolvingTrait.TraitMutation == True : # If Mutation is allowed in simulation
-                    probamut = 0.001 # We set a mutation probability (à passer en param global ou en attribut de classe)
+                    probamut = 0.1 # We set a mutation probability (à passer en param global ou en attribut de classe)
                     roll2mutate = np.random.uniform(0,1,1)
                     if roll2mutate < probamut : #Here there is mutation
                         #Newalpha = float(np.random.uniform(0,1,1)) # sample the new alpha value
@@ -348,8 +353,12 @@ def ChooseTraitValue(EvolvingTrait,NbTrigger,Statechange, Traitvalues, BetaI) : 
 
                         Parent_Value = newtraitsvalues[Index_reproducer] # We get the trait value of the parent
 
-                        ChangeMut = [-0.01,0.01]
-                        NewValue = round(float(Parent_Value + np.random.choice(ChangeMut, 1)),2)
+                        Value_postmut = float(np.random.normal(Parent_Value, 0.02, 1))
+                        NewValue = round(Value_postmut, 2)
+
+                        #ChangeMut = [-0.01,0.01]
+                        #NewValue = round(float(Parent_Value + np.random.choice(ChangeMut, 1)),2)
+
                         print('Nouvelle valeur après mutation', Parent_Value, NewValue)
                         newtraitsvalues.append(NewValue)
                         NewbetaValue = beta0 * NewValue / ( NewValue +1)
