@@ -23,7 +23,7 @@ rho = Params.rho  # Dispersal Cost
 epsilon = Params.epsilon  # Extinction rate
 
 # Define Spatial Configuration of the Simulation (Possible options, "Island", "Regular" or "Random", even "Modular" with jelham Hypergeometric stuff ?)
-Sp_Config = None
+Sp_Config = "Regular"
 
 def RunModel(seed, param) :
     #Simulation parameters
@@ -221,9 +221,11 @@ def RunModel(seed, param) :
                         for i in range(nbmigrants):
                             roll4urlife = np.random.uniform(0,1,1)
                             if roll4urlife > rho : SuccessfulMigrants += 1
+
                         #Here we distribute successful migrants among neighboring sites
                         #This part can be improved as neighboring rules become more complex, using a specific class 'network' to determine the neighbors
                         #Implemented this way, i should be easy to simulate on any network type
+
                         for i in range(SuccessfulMigrants):
                             if Site.traitvalues and abs(event.Ichange) > 0:
                                 # Get trait values of surviving individuals
@@ -236,14 +238,22 @@ def RunModel(seed, param) :
                                 dispersers_traitvalues.remove(SurvivorTrait)  # Chosen value is removed
                                 dispersers_beta.remove(SurvivorBeta)  # Remove it from the list
 
-                            index_sites = deepcopy(sites_indexes)  # working copy of site indexes vector
-                            del index_sites[
-                                index]  # Drop the current site from the list cause you can't emigrate to the place from which you departed
+                            #MIGRANT DISTRIBUTION FOR COMPLETE GRAPH "ISLAND"
+                            if Sp_Config == "Island":
+                                index_sites = deepcopy(sites_indexes)  # working copy of site indexes vector
+                                del index_sites[
+                                    index]  # Drop the current site from the list cause you can't emigrate to the place from which you departed
+                                Index_destination = np.random.choice(index_sites)  # Get index of destination site
 
-                            ### CHANGE THIS PART FOR TESTING OTHER SPATIAL CONFIGS ####
-
-                            Index_destination = np.random.choice(index_sites)  # Get index of destination site
-
+                            #MIGRANT DISTRIBUTION FOR REGULAR GRAPH WITH k NEIGHBORS
+                            elif Sp_Config == "Regular" :
+                                Current_site = index # Get the current site index
+                                print("Verifications prints")
+                                print("Site actuel", Current_site)
+                                Nearest_neighbors = Hastable_adjacency[f"{Current_site}"] # We get in the topology dictionnary neighbors corresponding to actual site
+                                print("Liste des voisins", Nearest_neighbors)
+                                Index_destination = np.random.choice(Nearest_neighbors) # And choose one of them at random
+                                print("Site receveur", Index_destination)
                             #Add individual to destination
                             if abs(event.Schange) > 0 : #if S are dispersers
                                 ListSites[Index_destination].effectifS += 1
