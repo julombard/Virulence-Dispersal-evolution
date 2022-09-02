@@ -17,6 +17,7 @@ class Site(): #Site object containing (non explicit) individuals
         self.effectifI = effectifI #I density
         self.traitvalues = [] #traitvalue Affect a trait to each individual (vector) without being individual-based
         self.betaI = []
+        self.Index = 0
 
         #self.pos = pos (tuple) : for future improvements, position of the site on the network grid, as matrix coordinates
         #self.neighbor = [] : for future, maybe including neighbors as an attribute (so it's computed only once)

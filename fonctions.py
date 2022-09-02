@@ -26,6 +26,7 @@ def SetMetapop(nbsite, taillepop): #Creates sites objects containing populations
     for i in range(nbsite): # Creates sites, the 1st will always contain one infected and the other 0
         if i == 0:
             newsite = classes.Site(effectifS=25, effectifI=13)
+            newsite.Index = i
             # Assign to each initialised infected individual a trait value for alpha
             for j in range(newsite.effectifI):
                 # newsite.traitvalues.append(float(np.random.uniform(0,1,1))) # For random sample from a given law, here uniform
@@ -45,6 +46,7 @@ def SetMetapop(nbsite, taillepop): #Creates sites objects containing populations
             #ListSites.append(newsite)
         else:
             newsite = classes.Site(effectifS=25, effectifI=13)
+            newsite.Index = i
             for j in range(newsite.effectifI):
                 #newsite.traitvalues.append(float(np.random.uniform(0,1,1)))
                 sampled_trait = float(np.random.normal(0.15, 0.02, 1))
@@ -335,7 +337,7 @@ def ChooseTraitValue(EvolvingTrait,NbTrigger,Statechange, Traitvalues, BetaI) : 
         if newtraitsvalues : # If the trait values vector is not empty (important : random sampling can't occur in empty objects)
             if Statechange > 0:  # If it's a birth
                 if EvolvingTrait.TraitMutation == True : # If Mutation is allowed in simulation
-                    probamut = 0.1 # We set a mutation probability (à passer en param global ou en attribut de classe)
+                    probamut = 0.0001 # We set a mutation probability (à passer en param global ou en attribut de classe)
                     roll2mutate = np.random.uniform(0,1,1)
                     if roll2mutate < probamut : #Here there is mutation
                         #Newalpha = float(np.random.uniform(0,1,1)) # sample the new alpha value
@@ -400,3 +402,25 @@ def ChooseTraitValue(EvolvingTrait,NbTrigger,Statechange, Traitvalues, BetaI) : 
 
 
     return newtraitsvalues, newBetaI
+
+def Build_Neighboring(Listsites, Nb_neighbors) : # ListSites is a list of sites objects, Nb_neighbors is an Int
+    List_indexes = []
+    for i in Listsites :
+        List_indexes.append(i.Index)
+    if Nb_neighbors %2 != 0 :
+        print("Please choose an even value for the number of neighbors")
+        dico_adjacency = {}
+    else :
+        dico_adjacency = {}
+        for i in List_indexes :
+            dico_adjacency[f"{i}"]= []
+            Index_current = List_indexes.index(i)
+            for j in range(int(Nb_neighbors/2)+1) : # /5 necessary cause the loop takes previous and next neighbourgs according to indexes / +1 necessary cause range(2) = [0,1]
+                if j != 0:
+                    Previous_neighbor = Index_current - j
+                    Next_neighbor = Index_current + j
+                    if Previous_neighbor in List_indexes :
+                        dico_adjacency[f"{i}"].append(List_indexes[Index_current - j])
+                    if Next_neighbor in List_indexes :
+                        dico_adjacency[f"{i}"].append(List_indexes[Index_current + j])
+    return dico_adjacency

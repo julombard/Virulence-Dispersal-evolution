@@ -22,6 +22,9 @@ alpha = Params.alpha  # Parasite Virulence
 rho = Params.rho  # Dispersal Cost
 epsilon = Params.epsilon  # Extinction rate
 
+# Define Spatial Configuration of the Simulation (Possible options, "Island", "Regular" or "Random", even "Modular" with jelham Hypergeometric stuff ?)
+Sp_Config = None
+
 def RunModel(seed, param) :
     #Simulation parameters
     # This part changes parameters value for long autonomous runs
@@ -40,14 +43,20 @@ def RunModel(seed, param) :
     nb_iterations = 0 #Store the number of interations to define times that are saved (later)
     sim_time = 0 # Simulation time (model time, not an iteration number)
     vectime = [0] # to keep t variable
-    tmax = 6000 # Ending time
+    tmax = 6 # Ending time
     Nexactsteps = 20  # Number of steps to do if/when performing direct method
-    nbsite = 60 # Number de sites
+    nbsite = 40 # Number de sites
     Taillepop = Params.k # Initial local population sizes
 
     Evoltrait = classes.EvolvingTrait('alpha', True)
+
     #Define population as class instances
     ListSites = fonctions.SetMetapop(nbsite, Taillepop)
+
+    #Build The network
+    nb_neighbors = 4
+    Hastable_adjacency = fonctions.Build_Neighboring(ListSites, nb_neighbors)
+    print(Hastable_adjacency)
 
     #Event definition
     #Further expansion idea : build events from a unique model.txt file read by the program, in order to simulate whathever you want
@@ -381,6 +390,6 @@ if __name__ == '__main__':
     for j in range(len(list_params)) :
         for i in range(nbsims):
             #pool.apply_async(RunModel, args=(list_seeds[i],list_params[j])) #Lance CPUnb simulations en meme temps, lorsqu'une simulation se termine elle est immediatement remplacee par la suivante
-            RunModel(list_seeds[i],list_params[j]) #pour debug hors multisim (messages d'ereur visible)
+            RunModel(list_seeds[i],list_params[j]) #pour debug hors multisim (messages d'ereur visibles)
     pool.close()
     pool.join()
