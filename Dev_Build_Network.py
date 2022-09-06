@@ -1,4 +1,5 @@
 # Script that build regular network of k neighbours
+import numpy as np
 from numpy import random
 import pandas as pd
 from copy import deepcopy
@@ -89,8 +90,11 @@ def Set_kneigh_random_network(List_sites) :
     ### Chacun est connecté à ses n plus proches voisins (géographiques)
     Dico_Connectivity = {}
     kneigh = 4
+    # Find the indexes of neighbors
+    Matrix_size = len(List_sites)
+    # List to fill with the matrix
+    connectivity_matrix = [] # Create an empty list
 
-    # Copier la matrices des distances pour la bidouiller localement
     for site in liste_des_sites :
         ActualSite = site
         #Find the distance that is zero (distance of the site to itself, must be deleted)
@@ -105,33 +109,74 @@ def Set_kneigh_random_network(List_sites) :
         sorted_distances = Distance_to_Actual.sort_values()
 
         # Get in list the neighbourgs and associated distances
-        my_neighbors = sorted_distances.index.tolist()
-        distance_neighbors = sorted_distances.tolist()
-        print("VOISINS",my_neighbors)
-        print("DISTANCES",distance_neighbors)
-
-        #Find the indexes of neighbors
-
-
-        Dico_neighbors = {}
+        otherSites_indexes = sorted_distances.index.tolist()
+        Distance_to_others = sorted_distances.tolist()
+        my_neighbors = []
+        Distance_to_neigh = []
         for i in range(kneigh) :
-            Dico_neighbors[my_neighbors[i]]=distance_neighbors[i]
-        print("Dico VOISiNS",Dico_neighbors)
+            my_neighbors.append(otherSites_indexes[i])
+            Distance_to_neigh.append(Distance_to_others[i])
+
+        #Create a matrix row with only zeros
+        row = np.zeros((Matrix_size))
+        for i in my_neighbors : # For each neighbor index found
+            row[int(i)] = 1 # Set connectivity to one
+        connectivity_matrix.append(row)
+        Array_matrix = np.array(connectivity_matrix)
 
 
 
 
-    return dico_coordSites, liste_des_sites,  Distances_entre_sites, Normalised_distance_matrix
 
-dico_coordSites, liste_des_sites,  Distances_entre_sites, Normalised_distance_matrix = Set_kneigh_random_network(Sites)
+    return dico_coordSites, liste_des_sites,  Distances_entre_sites, Normalised_distance_matrix, Array_matrix
+
+dico_coordSites, liste_des_sites,  Distances_entre_sites, Normalised_distance_matrix, Conn_Mat = Set_kneigh_random_network(Sites)
 
 #print("1",dico_coordSites)
 #print("2",liste_des_sites)
-print("3",Distances_entre_sites)
-print("4", Normalised_distance_matrix)
-print(Normalised_distance_matrix.sum())
+#print("3",Distances_entre_sites)
+#print("4", Normalised_distance_matrix)
+#print(Normalised_distance_matrix.sum())
+#print(Conn_Mat)
+
+###### Algorithm for hexagonal lattice grid (each site IS an hexagon, six neighbors) #####
+nb_sites = 25
+SiteListe = []
+for i in range(nb_sites):
+    SiteListe.append(i)
+
+# Explanation of the algorithm
+# 1. Build a square lattice grid
+# 2. For each even row, each site is linked to one on the next row, by his left-down diagonal
+# 3. For each odd row, each site is link to one in the next row by his right-down diagonal
+# 4. Deal with the boundary conditions if you want to.
+# 5. That's all
+
+def Build_Hexagonal_Regular_Grid(n,p): # Takes as parameters a number of sites per row (n) et per column (p)
+    nb_sites = n*p
+    dico_coordSites = {}
+    #First we explicit each site and assign them a vector of coordinates (x,y) that is their position on the grid
+    Site_counter = 0
+    for i in range(n) : # For each row
+        for j in range(p) : # And each column
+            dico_coordSites[Site_counter]= [i,j]
+            Site_counter += 1
+    #Now that the nodes are in place, we add egdes as if we wanted to fill a square lattice (with borders, for now)
+
+    return dico_coordSites
+
+def Pairwise_association(Coordinates,Type, length) : # Coordinate is a Dict object with Site = (x,y), Type is an str() that takes "Rows" or "Columns" values, length is the (int) length associated
+    if type == "Row"
+
+    if type == "Column"
+
+    if type != "Row" or type != "Column"
+        print("Error, please enter Row or Column")
 
 
+    return 0
 
 
-###### NETWORKX INSPIRED GRAPH DRAWING #####
+Dico = Build_Hexagonal_Regular_Grid(5,5)
+print(Dico)
+
