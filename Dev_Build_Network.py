@@ -1,4 +1,6 @@
 # TEST SCRIPT FOR SPATIAL STUFF, NOT NEEDED IN THE MAIN PROGRAM
+import math
+
 import numpy as np
 from numpy import random
 import pandas as pd
@@ -11,6 +13,8 @@ from scipy.spatial import distance_matrix
 Sites = [0,1,2,3,4,5,6,7,8,9]
 NbSites = len(Sites)
 Nb_Neighbors = 4
+
+print(int(math.sqrt(25)))
 
 ### CONSTRUCTION D'UN RESEAU A PARTIR DE SITES ADJACENTS DANS UNE LISTE
 

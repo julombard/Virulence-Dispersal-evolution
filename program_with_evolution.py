@@ -23,7 +23,7 @@ alpha = Params.alpha  # Parasite Virulence
 rho = Params.rho  # Dispersal Cost
 epsilon = Params.epsilon  # Extinction rate
 
-def RunModel(seed, param) :
+def RunModel(seed, param, Sp_config) :
 
     #SIMULATION PARAMETERS
 
@@ -39,7 +39,7 @@ def RunModel(seed, param) :
     vectime = [0] # to keep track of t variable
     tmax = 6000 # Ending time
     Nexactsteps = 20  # Number of steps to do if/when performing direct method (USELESS IF nbsite > 20~30)
-    nbsite = 40 # Number of sites
+    nbsite = 64 # Number of sites
     Taillepop = Params.k # Initial local population sizes
     Evoltrait = classes.EvolvingTrait('alpha', True) # Define the trait that will evolve in the simulation (only alpha availables for now)
 
@@ -52,9 +52,15 @@ def RunModel(seed, param) :
     ListSites = fonctions.SetMetapop(nbsite, Taillepop)
 
     #SPATIAL CONFIGURATIONS OPTIONS AND ENABLING
-    Sp_Config = "Regular" # INSERT HERE OPTIONS AVAILABLE
-    nb_neighbors = 4
-    Hastable_adjacency = NetworkFunctions.Build_Accordion_Neighboring(ListSites, nb_neighbors) #Gives adjacency lists
+    if Sp_config == "Square lattice" :
+        Hastable_adjacency = NetworkFunctions.Build_Square_Lattice(ListSites)
+        nb_neighbors = 4
+    if Sp_config == "Accordion":
+        nb_neighbors = 4
+        Hastable_adjacency = NetworkFunctions.Build_Accordion_Neighboring(ListSites, nb_neighbors)
+    if Sp_config == "Island" : pass
+
+     #Gives adjacency lists
     print(Hastable_adjacency)
 
     #EVENT DEFINITIONS
@@ -204,14 +210,14 @@ def RunModel(seed, param) :
                                 dispersers_beta.remove(SurvivorBeta)  # Remove it from the list
 
                             #MIGRANT DISTRIBUTION FOR COMPLETE GRAPH "ISLAND"
-                            if Sp_Config == "Island":
+                            if Sp_config == "Island":
                                 index_sites = deepcopy(sites_indexes)  # working copy of site indexes vector
                                 del index_sites[
                                     index]  # Drop the current site from the list cause you can't emigrate to the place from which you departed
                                 Index_destination = np.random.choice(index_sites)  # Get index of destination site
 
                             #MIGRANT DISTRIBUTION FOR ANY KIND OF THING THAT RETURNED AND ADJACENCY LIST IN THE BEGINING
-                            elif Sp_Config == "Regular" :
+                            elif Sp_config != "Island" :
                                 Current_site = index # Get the current site index
                                 Nearest_neighbors = Hastable_adjacency[f"{Current_site}"] # We get in the topology dictionnary neighbors corresponding to actual site
                                 Index_destination = np.random.choice(Nearest_neighbors) # And choose one of them at random
@@ -327,6 +333,7 @@ def RunModel(seed, param) :
 # Multiprocessing parameters
 list_seeds = [1,2,3,4,5,6] # The list of seed you want to test
 list_params =[0.5] # The list of params values you want to test (has to be changed also at the begining)
+list_config =["Square lattice"]
 nbsims = len(list_seeds)
 
 #Launch a batch of nbsims simulations
@@ -339,7 +346,7 @@ if __name__ == '__main__':
     for j in range(len(list_params)) :
         for i in range(nbsims):
             #Switch the two following lines to enable/disable multisim
-            pool.apply_async(RunModel, args=(list_seeds[i],list_params[j])) #Launch multisim
-            #RunModel(list_seeds[i],list_params[j]) #Launch without multisim (restores errors messages)
+            #pool.apply_async(RunModel, args=(list_seeds[i],list_params[j], list_config[j])) #Launch multisim
+            RunModel(list_seeds[i],list_params[j], list_config[j]) #Launch without multisim (restores errors messages)
     pool.close() # Mandatory
     pool.join() # Idem

@@ -5,13 +5,13 @@ from numpy import random
 import pandas as pd
 from copy import deepcopy
 from scipy.spatial import distance_matrix
-
+import math
 ###############################  THE FUNCTIONS ######################################
 
 # Build a k nearest neighbors graph (which looks like an accordion for k=4)
 # Easiest way to define neighborhood, you get k adjacents values in a sorted list
 
-def Build_Accordion_Neighboring(Listsites, Nb_neighbors) : # ListSites is a list of sites objects, Nb_neighbors is an Int
+def Build_Accordion_Neighboring(Listsites, Nb_neighbors) : # ListSites is a list of sites objects, Nb_neighbors is an even int
     List_indexes = []
     for i in Listsites :
         List_indexes.append(i.Index)
@@ -43,9 +43,7 @@ def Set_kneigh_random_network(List_sites) :
     Liste_x = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30]
     Liste_y = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28,
                29, 30]
-
     data_coord = []  # Liste qui contiendra la liste des coordonnées de chaque station
-
     # Dictionnaire qui contient en Key l'identifiant de la station et en valeur l'objet station
     dico_coordSites = {}
 
@@ -62,15 +60,11 @@ def Set_kneigh_random_network(List_sites) :
         dico_coordSites[f"{iteration}"] = xy_list
         #print(dico_univers)
 
-
     liste_des_sites = list(dico_coordSites.keys())
-    #print('data', data)
-    #print("liste des noms de stations", liste_nom_stations)
 
     #On crée la matrice de distances entre les stations
     df = pd.DataFrame(data_coord, columns=['xcord', 'ycord'], index=liste_des_sites)
     Distances_entre_sites = pd.DataFrame(distance_matrix(df.values, df.values), index=df.index, columns=df.index)
-    #print(Distances_entre_stations)
 
     ### Normaliser la matrice de distances (somme des lignes fait 1)
     Dico_normalised = {}
@@ -82,10 +76,8 @@ def Set_kneigh_random_network(List_sites) :
             Dico_normalised[f"{i}"].append(j/sumrow) # Normalize distances
     Normalised_distance_matrix =  pd.DataFrame.from_dict(data=Dico_normalised) # And Build a DF from distances dictionnary
 
-
     ### Transformer la matrice des distances en matrice de connectivité
     ### Chacun est connecté à ses n plus proches voisins (géographiques)
-    Dico_Connectivity = {}
     kneigh = 4
     # Find the indexes of neighbors
     Matrix_size = len(List_sites)
@@ -121,10 +113,6 @@ def Set_kneigh_random_network(List_sites) :
         connectivity_matrix.append(row)
         Array_matrix = np.array(connectivity_matrix)
 
-
-
-
-
     return dico_coordSites, liste_des_sites,  Distances_entre_sites, Normalised_distance_matrix, Array_matrix
 
 # This one builds a regular square lattice grid (4 neighbors)
@@ -132,7 +120,6 @@ def Set_kneigh_random_network(List_sites) :
 
 def Pairwise_association(Coordinates,Type, length) : # Coordinate is a Dict object with Site = (x,y), Type is an str() that takes "Rows" or "Columns" values, length is the (int) length associated
     pairs = []
-    Coordinates_copy = deepcopy(Coordinates)
     Liste_keys = list(Coordinates.keys())
     if Type == "Row":
         for i in range(len(Coordinates)-1) :
@@ -152,35 +139,38 @@ def Pairwise_association(Coordinates,Type, length) : # Coordinate is a Dict obje
         print("Error, only Row or Column are suitable inputs")
 
     return pairs
-def Build_Square_Lattice(n,p): # Takes as parameters a number of sites per row (n) et per column (p)
-    nb_sites = n*p
-    dico_coordSites = {}
-    #First we explicit each site and assign them a vector of coordinates (x,y) that is their position on the grid
-    Site_counter = 0
-    for i in range(n) : # For each row
-        for j in range(p) : # And each column
-            dico_coordSites[Site_counter]= [i,j]
-            Site_counter += 1
-    #Now that the nodes are in place, we add edges as if we wanted to fill a square lattice (with borders, for now)
-    row_edges = Pairwise_association(dico_coordSites, "Row", n)
-    col_edges = Pairwise_association(dico_coordSites, "Column", p)
+def Build_Square_Lattice(List_sites): # Takes as parameters a number of sites per row (n) et per column (p)
+    nb_sites = len(List_sites)
+    n = int(math.sqrt(nb_sites))
+    p =int(math.sqrt(nb_sites))
 
-    #From this we build an adjacency dictionnary, which at each site makes correspond a list of neighbors
-    dico_neighborhood = {}
-    for i in range(nb_sites) :
-        dico_neighborhood[f"{i}"]= []
-        for pair in row_edges :
-            if i in pair :
-                paircopy = deepcopy(pair)
-                paircopy.remove(i)
-                dico_neighborhood[f"{i}"].append(paircopy[0])
-        for pair in col_edges :
-            if i in pair :
-                paircopy = deepcopy(pair)
-                paircopy.remove(i)
-                dico_neighborhood[f"{i}"].append(paircopy[0])
+    if n or p is int :
+        dico_coordSites = {}
+        #First we explicit each site and assign them a vector of coordinates (x,y) that is their position on the grid
+        Site_counter = 0
+        for i in range(n) : # For each row
+            for j in range(p) : # And each column
+                dico_coordSites[Site_counter]= [i,j]
+                Site_counter += 1
+        #Now that the nodes are in place, we add edges as if we wanted to fill a square lattice (with borders, for now)
+        row_edges = Pairwise_association(dico_coordSites, "Row", n)
+        col_edges = Pairwise_association(dico_coordSites, "Column", p)
 
-
+        #From this we build an adjacency dictionnary, which at each site makes correspond a list of neighbors
+        dico_neighborhood = {}
+        for i in range(nb_sites) :
+            dico_neighborhood[f"{i}"]= []
+            for pair in row_edges :
+                if i in pair :
+                    paircopy = deepcopy(pair)
+                    paircopy.remove(i)
+                    dico_neighborhood[f"{i}"].append(paircopy[0])
+            for pair in col_edges :
+                if i in pair :
+                    paircopy = deepcopy(pair)
+                    paircopy.remove(i)
+                    dico_neighborhood[f"{i}"].append(paircopy[0])
+    else : print("Can't make a square with that number of sites....")
     return dico_neighborhood
 
 # This one builds a regular hexagonal lattice grid (6 neighbors)
@@ -217,8 +207,6 @@ def Build_Hexagonal_Lattice(n,p): # Takes as parameters a number of sites per ro
                 Index_neighbor = List_values.index(diagonal_right_neighbor)
                 Diagonal_edges.append([i, List_keys[Index_neighbor]])
 
-
-
     #From this we build an adjacency dictionnary, which at each site makes correspond a list of neighbors
     dico_neighborhood = {}
     for i in range(nb_sites) :
@@ -238,6 +226,4 @@ def Build_Hexagonal_Lattice(n,p): # Takes as parameters a number of sites per ro
                 paircopy = deepcopy(pair)
                 paircopy.remove(i)
                 dico_neighborhood[f"{i}"].append(paircopy[0])
-
-
     return dico_neighborhood
