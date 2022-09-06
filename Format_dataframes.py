@@ -1,9 +1,6 @@
-# This script has to be used to format Dataframes produced by tau-algorithm and direct method
-#Because rstudio sucks AND < Python
-#Because the dataframe from directmethod are huge
-#Because python creates copy from objects only when asked, whereas rstudio 'prend des initiatives'
-#Formated dataframes will be analyzed on R for pluralism (even if pandas would be obviously better )
-#Objetive : reduce df with 1.600K line to one with 40K
+#### SCRIPT USED (IN THE PAST) TO REDUCE THE SIZE OF OUPUTS WHEN NEEDED ####
+#### USELESS : NOW PLEASE USE THE TIMESTEP SAVING IN THE MAIN PROGRAM #####
+
 import os
 
 import numpy as np

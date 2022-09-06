@@ -1,8 +1,9 @@
-# Stochastic Simulation Algorithm for Metapopulation models
+# FUNCTION FOR THE BASIC METAPOPULATION MODEL : INCLUDES EVERYTHING EXCEPT THE NETWORK PART
 import classes
 import numpy as np
 from copy import deepcopy
 import Params
+
 #Parameters extracted from param files
 beta0 = Params.beta0 # Infectious contact rate
 bi = Params.bi  # Per capita net growth rate
@@ -15,11 +16,16 @@ alpha = Params.alpha  # Parasite Virulence
 rho = Params.rho  # Dispersal Cost
 epsilon = Params.epsilon  # Extinction rate
 
+### FOR VIRULENCE EVOLUTION, WE STATE HERE THE RANGE OF VIRULENCE VALUES THAT CAN BE TAKEN
+
 Possible_alpha_values = list(np.arange(0,1, 0.01)) # Here we get values from 1st to 2nd by 3rd
 Rounded_alpha_values = []
 for i in Possible_alpha_values :
     Rounded_alpha_values.append(round(i,2))
 print('possible alphas',Rounded_alpha_values)
+
+
+##### THIS FUNCTION ENABLES A METAPOP : ENABLE INITIAL CONDITION FOR BOTH DEMOGRAPHY AND EVOLUTION
 
 def SetMetapop(nbsite, taillepop): #Creates sites objects containing populations
     ListSites=[] # List that will contain all sites
@@ -56,6 +62,10 @@ def SetMetapop(nbsite, taillepop): #Creates sites objects containing populations
         ListSites.append(newsite)
     return ListSites
 
+
+
+#### FUNCTIONS FOR TAU-LEAP ALGORITHM :
+
 def GetPropensites (Sites, Events): # Compute the propensities
     Propensities = []
     for i in Events: # For each event
@@ -73,7 +83,6 @@ def GetPropensites (Sites, Events): # Compute the propensities
     for i in Propensities :
         sumpropensities.append(sum(i))
     return Propensities, sumpropensities
-
 
 def GetPropensites_Per_sites (Sites, Events): # Compute the propensities
     Propensities_per_sites = []
@@ -193,6 +202,9 @@ def GetTauPrime(Epsis, Mus):
 
     return TauPrime
 
+#### FUNCTIONS FOR THE GILLESPIE ALGORITHM
+#### MAYBE NOT FUNCTIONAL ANYMORE, BUT NEVER USED UNLESS THE NUMBER OF SITES IS < 30
+
 def DoDirectMethod(Propensities, Sum_propensities, exactsteps, events, sites):
     rho = Params.rho  # Not very convenient to put it here but it has to....
 
@@ -252,7 +264,6 @@ def DoDirectMethod(Propensities, Sum_propensities, exactsteps, events, sites):
             site.effectifS +=  event.Schange
             site.effectifI +=  event.Ichange
         return Tau
-
 
 def DoDirectMethodV2(Propensities, Sum_propensities, exactsteps, events, sites, index_sites):
     rho = Params.rho  # Not very convenient to put it here but it has to....
@@ -321,6 +332,8 @@ def DoDirectMethodV2(Propensities, Sum_propensities, exactsteps, events, sites, 
                 site.effectifI += event.Ichange
         return Tau
 
+#### FUNCTIONS FOR THE EVOLUTIONNARY DYNAMICS OF VIRULENCE
+
 def GetBetaI(traitvalues): # At initialization ONLY , When evolution with trade-off transmission virulence, get beta values from alpha
     IndividualValues = [] #Outlist
     if traitvalues : # If Not empty
@@ -328,7 +341,6 @@ def GetBetaI(traitvalues): # At initialization ONLY , When evolution with trade-
             value = beta0 * traitvalues[i] / (1+ (traitvalues[i])) # Get an individual value of beta
             IndividualValues.append(value) # store them
     return IndividualValues
-
 
 def ChooseTraitValue(EvolvingTrait,NbTrigger,Statechange, Traitvalues, BetaI) : #Function that choose wich individual is added / depleted during evolutive events (DOES NOT HOLD FOR DISPERSAL)
     newtraitsvalues = deepcopy(Traitvalues) # This line is probably useless, but the safer the wiser
@@ -403,24 +415,3 @@ def ChooseTraitValue(EvolvingTrait,NbTrigger,Statechange, Traitvalues, BetaI) : 
 
     return newtraitsvalues, newBetaI
 
-def Build_Neighboring(Listsites, Nb_neighbors) : # ListSites is a list of sites objects, Nb_neighbors is an Int
-    List_indexes = []
-    for i in Listsites :
-        List_indexes.append(i.Index)
-    if Nb_neighbors %2 != 0 :
-        print("Please choose an even value for the number of neighbors")
-        dico_adjacency = {}
-    else :
-        dico_adjacency = {}
-        for i in List_indexes :
-            dico_adjacency[f"{i}"]= []
-            Index_current = List_indexes.index(i)
-            for j in range(int(Nb_neighbors/2)+1) : # /5 necessary cause the loop takes previous and next neighbourgs according to indexes / +1 necessary cause range(2) = [0,1]
-                if j != 0:
-                    Previous_neighbor = Index_current - j
-                    Next_neighbor = Index_current + j
-                    if Previous_neighbor in List_indexes :
-                        dico_adjacency[f"{i}"].append(List_indexes[Index_current - j])
-                    if Next_neighbor in List_indexes :
-                        dico_adjacency[f"{i}"].append(List_indexes[Index_current + j])
-    return dico_adjacency

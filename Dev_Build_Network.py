@@ -1,4 +1,4 @@
-# Script that build regular network of k neighbours
+# TEST SCRIPT FOR SPATIAL STUFF, NOT NEEDED IN THE MAIN PROGRAM
 import numpy as np
 from numpy import random
 import pandas as pd

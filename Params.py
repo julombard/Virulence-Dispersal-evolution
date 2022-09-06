@@ -1,4 +1,4 @@
-#Model parameters
+#####   MODEL PARAMETERS FOR POPULATION DYNAMICS ####
 beta0 = 1  #Infectious contact rate
 bi = 2  #Per capita birth rate
 di = 0.5 #Per capita natural death rate

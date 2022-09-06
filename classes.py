@@ -1,15 +1,20 @@
 import Params
-#Parameters extracted from param files
+
+# Parameters extracted from param files
 beta0 = Params.beta0 # Infectious contact rate
 bi = Params.bi  # Per capita net growth rate
 di = Params.di # Per capita natural death rate
 omega = Params.omega # Strength of density dependance on births
 k = Params.k  # Carrying capacity
-d = 1# Dispersal propensity
+d = 1 # Dispersal propensity
 gamma = Params.gamma  # Parasite Clearance
 alpha = Params.alpha  # Parasite Virulence
 rho = Params.rho  # Dispersal Cost
 epsilon = Params.epsilon  # Extinction rate
+
+### SPECIFIC PYTHON OBJECTS ###
+
+# A SITE CONTAINS INDIVIDUAL DENSITIES AND TRAITS VALUES FOR A LOCAL POPULATION
 
 class Site(): #Site object containing (non explicit) individuals
     def __init__(self,effectifS,effectifI, *args): #First try with arg way to implement feature unsure
@@ -18,14 +23,17 @@ class Site(): #Site object containing (non explicit) individuals
         self.traitvalues = [] #traitvalue Affect a trait to each individual (vector) without being individual-based
         self.betaI = []
         self.Index = 0
-
         #self.pos = pos (tuple) : for future improvements, position of the site on the network grid, as matrix coordinates
         #self.neighbor = [] : for future, maybe including neighbors as an attribute (so it's computed only once)
+
+# AN EVOLVING TRAIT IS THE TRAIT IN EVOLUTIONARY MODEL
+
 class EvolvingTrait():
     def __init__(self, name, IsMutation): #str, bool
         self.Traitname = name
         self.TraitMutation = IsMutation
 
+# EVENTS THAT CAN HAPPEN IN THE MODEL, WITH THEIR EFFECT ON POPULATION, THEIR PROPENSITY AND STUFF
 class Event():
     def __init__(self,name, propensity, Schange, Ichange, order,EvolvingTrait):
         self.name = name # Event name in letter and not in memory address, handful to identify what's happening
