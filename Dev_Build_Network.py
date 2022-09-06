@@ -1,6 +1,7 @@
 # Script that build regular network of k neighbours
 from numpy import random
 import pandas as pd
+from copy import deepcopy
 # Based on adjacency list, geometry of 4-neighbor graph does not necessarily corresponds to a regular quare grid
 
 # Set the List of sites (should be indexed by N )
@@ -10,7 +11,7 @@ Sites = [0,1,2,3,4,5,6,7,8,9]
 NbSites = len(Sites)
 Nb_Neighbors = 4
 
-def Build_Neighboring(Listsites, Nb_neighbors ) : # ListSites is a list of sites objects, Nb_neighbors is an Int
+def Build_Accordion_Neighboring(Listsites, Nb_neighbors ) : # ListSites is a list of sites objects, Nb_neighbors is an Int
     List_indexes = []
     for i in Listsites :
         List_indexes.append(i.index)
@@ -39,7 +40,7 @@ def Build_Neighboring(Listsites, Nb_neighbors ) : # ListSites is a list of sites
 
 ### FONCTION QUI FAIT UN RESEAU ALEATOIRE AVEC POSSIBLES DISTANCES GEOGRAPHIQUES
 Sites = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
-def Set_random_network(List_sites) :
+def Set_kneigh_random_network(List_sites) :
 
     Liste_x = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30]
     Liste_y = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28,
@@ -76,27 +77,53 @@ def Set_random_network(List_sites) :
     ### Normaliser la matrice de distances (somme des lignes fait 1)
     Dico_normalised = {}
     for i in range(len(Distances_entre_sites)):
-        row_values = Distances_entre_sites.iloc[i]
-        Dico_normalised[f"{i}"] = []
-        sumrow = sum(row_values)
+        row_values = Distances_entre_sites.iloc[i] # Get values per row
+        Dico_normalised[f"{i}"] = [] # Enable storage
+        sumrow = sum(row_values) # Get the sum of row values
         for j in row_values :
-            Dico_normalised[f"{i}"].append(j/sumrow)
-    Normalised_distance_matrix =  pd.DataFrame.from_dict(data=Dico_normalised)
+            Dico_normalised[f"{i}"].append(j/sumrow) # Normalize distances
+    Normalised_distance_matrix =  pd.DataFrame.from_dict(data=Dico_normalised) # And Build a DF from distances dictionnary
 
 
     ### Transformer la matrice des distances en matrice de connectivité
     ### Chacun est connecté à ses n plus proches voisins (géographiques)
     Dico_Connectivity = {}
-    n = 1
+    kneigh = 4
 
     # Copier la matrices des distances pour la bidouiller localement
-    Distances_entre_sites_copy = deepcopy(Distances_entre_sites)
+    for site in liste_des_sites :
+        ActualSite = site
+        #Find the distance that is zero (distance of the site to itself, must be deleted)
+        Distances_entre_sites_copy = deepcopy(Distances_entre_sites) # For local modification
+        indexNames = Distances_entre_sites_copy[Distances_entre_sites_copy[ActualSite] == 0].index
+        Distances_entre_sites_copy.drop(indexNames, inplace=True) # Deletion
+
+        #Select distances to the actual place in a 'table'
+        Distance_to_Actual = Distances_entre_sites_copy[ActualSite]
+
+        #Find the mins : we simply sort the values and keep the kneigh first
+        sorted_distances = Distance_to_Actual.sort_values()
+
+        # Get in list the neighbourgs and associated distances
+        my_neighbors = sorted_distances.index.tolist()
+        distance_neighbors = sorted_distances.tolist()
+        print("VOISINS",my_neighbors)
+        print("DISTANCES",distance_neighbors)
+
+        #Find the indexes of neighbors
+
+
+        Dico_neighbors = {}
+        for i in range(kneigh) :
+            Dico_neighbors[my_neighbors[i]]=distance_neighbors[i]
+        print("Dico VOISiNS",Dico_neighbors)
+
 
 
 
     return dico_coordSites, liste_des_sites,  Distances_entre_sites, Normalised_distance_matrix
 
-dico_coordSites, liste_des_sites,  Distances_entre_sites, Normalised_distance_matrix = Set_random_network(Sites)
+dico_coordSites, liste_des_sites,  Distances_entre_sites, Normalised_distance_matrix = Set_kneigh_random_network(Sites)
 
 #print("1",dico_coordSites)
 #print("2",liste_des_sites)
@@ -106,35 +133,5 @@ print(Normalised_distance_matrix.sum())
 
 
 
-#### FIND k-order nearest neighbor
-stationactu = position
-    #print(stationactu)
 
-    # Trouver la ligne de la station actuelle où la valeur de distance vaut zéro (car distance avec elle-même)
-    indexNames = Distances_entre_stations_copy[Distances_entre_stations_copy[stationactu] == 0].index
-    #print(indexNames)
-    # Supprimer la ligne du DataFrame
-    Distances_entre_stations_copy.drop(indexNames, inplace=True)
-    #print(Distances_entre_stations_copy)
-    # Sélection d'un sous tableau avec les valeurs d'intérets (distances au point actuel)
-    Distance_a_stationactuelle = Distances_entre_stations_copy[stationactu]
-    #print(Distance_a_stationactuelle)
-    # Triage des valeurs dans l'ordre croissant
-    sorted_distances = Distance_a_stationactuelle.sort_values()
-    #print(sorted_distances)
-
-    # Sort en liste les noms des voisins et leurs distances associées
-    nom_Voisins = sorted_distances.index.tolist()
-    distance_voisins = sorted_distances.tolist()
-    #print(nom_Voisins)
-
-    # pour un voyage possible au plus proche voisin d'ordre n
-    n = 3
-    destination = {}
-    for i in range(n):
-        #print(i, ". Vous pouvez voyager vers", nom_Voisins[i], "qui se trouve à une distance de",
-              #distance_voisins[i], "UA.")
-        text = "Voyage vers {} distance {} / station {} ".format(nom_Voisins[i],distance_voisins[i],dico_de_merde[nom_Voisins[i]].type)
-
-        texte_affichage.append(text)
-        destination[nom_Voisins[i]]= distance_voisins[i]
+###### NETWORKX INSPIRED GRAPH DRAWING #####

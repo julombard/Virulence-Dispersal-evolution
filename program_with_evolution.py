@@ -43,7 +43,7 @@ def RunModel(seed, param) :
     nb_iterations = 0 #Store the number of interations to define times that are saved (later)
     sim_time = 0 # Simulation time (model time, not an iteration number)
     vectime = [0] # to keep t variable
-    tmax = 6 # Ending time
+    tmax = 6000 # Ending time
     Nexactsteps = 20  # Number of steps to do if/when performing direct method
     nbsite = 40 # Number de sites
     Taillepop = Params.k # Initial local population sizes
@@ -248,12 +248,8 @@ def RunModel(seed, param) :
                             #MIGRANT DISTRIBUTION FOR REGULAR GRAPH WITH k NEIGHBORS
                             elif Sp_Config == "Regular" :
                                 Current_site = index # Get the current site index
-                                print("Verifications prints")
-                                print("Site actuel", Current_site)
                                 Nearest_neighbors = Hastable_adjacency[f"{Current_site}"] # We get in the topology dictionnary neighbors corresponding to actual site
-                                print("Liste des voisins", Nearest_neighbors)
                                 Index_destination = np.random.choice(Nearest_neighbors) # And choose one of them at random
-                                print("Site receveur", Index_destination)
                             #Add individual to destination
                             if abs(event.Schange) > 0 : #if S are dispersers
                                 ListSites[Index_destination].effectifS += 1
@@ -372,21 +368,21 @@ def RunModel(seed, param) :
     datadensity = pd.DataFrame.from_dict(data=dico_densities_df)
     VectimeDf = pd.DataFrame(data=vectime)
     datadensity.insert(0, "Time", VectimeDf, allow_duplicates=False)
-    datadensity.to_csv('Metapop_Outputs_Branch_gaussian+mut_t6000' + str(d) + '_' + str(seed) + '.csv')
+    datadensity.to_csv('Metapop_Outputs_Branch_regular_t6000' + str(d) + '_' + str(seed) + '.csv')
     # Creating Mean trait dataframe
     datatrait = pd.DataFrame.from_dict(data=dico_traits_df)
     datatrait.insert(0, 'Time', VectimeDf, allow_duplicates=False)
-    datatrait.to_csv('Traits_outputs_Branch_gaussian+mut_t6000' + str(d) + '_' + str(seed) + '.csv')
+    datatrait.to_csv('Traits_outputs_Branch_regular_t6000' + str(d) + '_' + str(seed) + '.csv')
     # Creating distribution dataframe
     datadistrib = pd.DataFrame.from_dict(data=dico_distrib_df)
     datadistrib.insert(0, 'Time', VectimeDf, allow_duplicates=False)
-    datadistrib.to_csv('Distribution_outputs_Branch_gaussian+mut_t6000' + str(d) + '_' + str(seed) + '.csv')
+    datadistrib.to_csv('Distribution_outputs_Branch_regular_t6000' + str(d) + '_' + str(seed) + '.csv')
 
 ################### MULTIPROCESSING PART ###########
 
 
 # Paramètres de multiprocessing
-list_seeds = [7,8,9,10,11,12]
+list_seeds = [1,2,3,4,5,6]
 list_params =[0.5]
 nbsims = len(list_seeds)
 
@@ -399,7 +395,7 @@ if __name__ == '__main__':
     pool = multiprocessing.Pool(processes=CPUnb) # Je ne sais pas trop ce que ça fait
     for j in range(len(list_params)) :
         for i in range(nbsims):
-            #pool.apply_async(RunModel, args=(list_seeds[i],list_params[j])) #Lance CPUnb simulations en meme temps, lorsqu'une simulation se termine elle est immediatement remplacee par la suivante
-            RunModel(list_seeds[i],list_params[j]) #pour debug hors multisim (messages d'ereur visibles)
+            pool.apply_async(RunModel, args=(list_seeds[i],list_params[j])) #Lance CPUnb simulations en meme temps, lorsqu'une simulation se termine elle est immediatement remplacee par la suivante
+            #RunModel(list_seeds[i],list_params[j]) #pour debug hors multisim (messages d'ereur visibles)
     pool.close()
     pool.join()
