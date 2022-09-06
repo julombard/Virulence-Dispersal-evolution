@@ -138,6 +138,8 @@ dico_coordSites, liste_des_sites,  Distances_entre_sites, Normalised_distance_ma
 #print("4", Normalised_distance_matrix)
 #print(Normalised_distance_matrix.sum())
 #print(Conn_Mat)
+import networkx as nx
+nx.grid_2d_graph
 
 ###### Algorithm for hexagonal lattice grid (each site IS an hexagon, six neighbors) #####
 nb_sites = 25
@@ -166,17 +168,33 @@ def Build_Hexagonal_Regular_Grid(n,p): # Takes as parameters a number of sites p
     return dico_coordSites
 
 def Pairwise_association(Coordinates,Type, length) : # Coordinate is a Dict object with Site = (x,y), Type is an str() that takes "Rows" or "Columns" values, length is the (int) length associated
-    if type == "Row"
+    pairs = []
+    Coordinates_copy = deepcopy(Coordinates)
+    Liste_keys = list(Coordinates.keys())
+    if Type == "Row":
+        for i in range(len(Coordinates)-1) :
+            xpos = Coordinates[i][1]  # 1 because we look on rows
+            xnext = Coordinates[i+1][1]
+            if xpos == xnext - 1 : #If we look at an adjancent site (row)
+                pairs.append([Liste_keys[i], Liste_keys[i+1]])
 
-    if type == "Column"
+    if Type == "Column":
+        for i in range(len(Coordinates)-length) :
+            xpos = Coordinates[i][0]  # 0 because we look on columns
+            xnext = Coordinates[i+length][0]
+            if xpos == xnext - 1 : #If we look at an adjancent site (column)
+                pairs.append([Liste_keys[i], Liste_keys[i+length]])
 
-    if type != "Row" or type != "Column"
-        print("Error, please enter Row or Column")
+    if Type != "Row" and Type != "Column":
+        print("Error, only Row or Column are suitable inputs")
 
-
-    return 0
+    return pairs
 
 
 Dico = Build_Hexagonal_Regular_Grid(5,5)
 print(Dico)
+print("j'ai perdu mes cles", Dico.keys())
+print(len(Dico))
+Row_pairs = Pairwise_association(Dico, "Column", 5)
+print(Row_pairs)
 
