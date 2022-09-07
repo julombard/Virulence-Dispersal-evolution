@@ -39,7 +39,9 @@ def RunModel(seed, param, Sp_config) :
     vectime = [0] # to keep track of t variable
     tmax = 6000 # Ending time
     Nexactsteps = 20  # Number of steps to do if/when performing direct method (USELESS IF nbsite > 20~30)
-    nbsite = 64 # Number of sites
+    nbsite = 49 # Number of sites
+    n = 7 #Number of rows  for lattices configurations
+    p= 7 # Number of columns for lattices configurations
     Taillepop = Params.k # Initial local population sizes
     Evoltrait = classes.EvolvingTrait('alpha', True) # Define the trait that will evolve in the simulation (only alpha availables for now)
 
@@ -53,12 +55,14 @@ def RunModel(seed, param, Sp_config) :
 
     #SPATIAL CONFIGURATIONS OPTIONS AND ENABLING
     if Sp_config == "Square lattice" :
-        Hastable_adjacency = NetworkFunctions.Build_Square_Lattice(ListSites)
+        Hastable_adjacency = NetworkFunctions.Build_Square_Lattice(n,p,ListSites)
         nb_neighbors = 4
     if Sp_config == "Accordion":
         nb_neighbors = 4
         Hastable_adjacency = NetworkFunctions.Build_Accordion_Neighboring(ListSites, nb_neighbors)
-    if Sp_config == "Island" : pass
+    if Sp_config == "Island" : pass # The programm was initially designed for island (complete graph) pop so we just go with the flow
+    if Sp_config == "Hexagonal lattice" :
+        Hastable_adjacency = NetworkFunctions.Build_Hexagonal_Lattice(n,p,ListSites) # n the number or row desired (int), p the number of columns (int) , ListSite a list of site objects
 
      #Gives adjacency lists
     print(Hastable_adjacency)
@@ -333,7 +337,7 @@ def RunModel(seed, param, Sp_config) :
 # Multiprocessing parameters
 list_seeds = [1,2,3,4,5,6] # The list of seed you want to test
 list_params =[0.5] # The list of params values you want to test (has to be changed also at the begining)
-list_config =["Square lattice"]
+list_config =["Hexagonal lattice"]
 nbsims = len(list_seeds)
 
 #Launch a batch of nbsims simulations

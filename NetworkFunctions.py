@@ -139,12 +139,10 @@ def Pairwise_association(Coordinates,Type, length) : # Coordinate is a Dict obje
         print("Error, only Row or Column are suitable inputs")
 
     return pairs
-def Build_Square_Lattice(List_sites): # Takes as parameters a number of sites per row (n) et per column (p)
+def Build_Square_Lattice(n,p,List_sites): # Takes as parameters two int : a number of sites per row (n) et per column (p); and a list of site objects
     nb_sites = len(List_sites)
-    n = int(math.sqrt(nb_sites))
-    p =int(math.sqrt(nb_sites))
 
-    if n or p is int :
+    if nb_sites == n*p : # Check the size of the lattice
         dico_coordSites = {}
         #First we explicit each site and assign them a vector of coordinates (x,y) that is their position on the grid
         Site_counter = 0
@@ -170,60 +168,63 @@ def Build_Square_Lattice(List_sites): # Takes as parameters a number of sites pe
                     paircopy = deepcopy(pair)
                     paircopy.remove(i)
                     dico_neighborhood[f"{i}"].append(paircopy[0])
-    else : print("Can't make a square with that number of sites....")
+    else : print("ERROR : How i am supposed to build a square of",n,"rows",p,"columns with",len(List_sites),"objects ?")
     return dico_neighborhood
 
 # This one builds a regular hexagonal lattice grid (6 neighbors)
 # The pairwise association function is also needed in it
-def Build_Hexagonal_Lattice(n,p): # Takes as parameters a number of sites per row (n) et per column (p)
-    nb_sites = n*p
-    dico_coordSites = {}
-    #First we explicit each site and assign them a vector of coordinates (x,y) that is their position on the grid
-    Site_counter = 0
-    for i in range(n) : # For each row
-        for j in range(p) : # And each column
-            dico_coordSites[Site_counter]= [i,j]
-            Site_counter += 1
-    #Now that the nodes are in place, we add edges as if we wanted to fill a square lattice (with borders, for now)
-    row_edges = Pairwise_association(dico_coordSites, "Row", n)
-    col_edges = Pairwise_association(dico_coordSites, "Column", p)
+def Build_Hexagonal_Lattice(n,p, List_Sites): # Takes as parameters a number of sites per row (n) et per column (p)
 
-    #Complete the diagonal edges in order to get the hexagonal lattice
-    Diagonal_edges = []
-    List_keys = list(dico_coordSites.keys())
-    List_values = list(dico_coordSites.values())
-    for i in range(len(dico_coordSites)): # For each node
-        coord = dico_coordSites[i] # We get its coordinate
-        print("HERE COME THE X", coord[0])
-        if coord[0] % 2 == 0 : # If the x component is even
-            diagonal_left_neighbor = [coord[0]+1, coord[1]-1] # we get the site in (x+1, y-1)
-            if diagonal_left_neighbor in dico_coordSites.values() : # if it exists
-                Index_neighbor = List_values.index(diagonal_left_neighbor)
-                Diagonal_edges.append([i, List_keys[Index_neighbor]])
+    if len(List_Sites) == n*p :
+        nb_sites = n*p
+        dico_coordSites = {}
+        #First we explicit each site and assign them a vector of coordinates (x,y) that is their position on the grid
+        Site_counter = 0
+        for i in range(n) : # For each row
+            for j in range(p) : # And each column
+                dico_coordSites[Site_counter]= [i,j]
+                Site_counter += 1
+        #Now that the nodes are in place, we add edges as if we wanted to fill a square lattice (with borders, for now)
+        row_edges = Pairwise_association(dico_coordSites, "Row", n)
+        col_edges = Pairwise_association(dico_coordSites, "Column", p)
 
-        if coord[0] % 2 != 0 : # If the x component is odd
-            diagonal_right_neighbor = [coord[0] + 1, coord[1] + 1]  # we get the site in (x+1, y-1)
-            if diagonal_right_neighbor in dico_coordSites.values():  # if it exists
-                Index_neighbor = List_values.index(diagonal_right_neighbor)
-                Diagonal_edges.append([i, List_keys[Index_neighbor]])
+        #Complete the diagonal edges in order to get the hexagonal lattice
+        Diagonal_edges = []
+        List_keys = list(dico_coordSites.keys())
+        List_values = list(dico_coordSites.values())
+        for i in range(len(dico_coordSites)): # For each node
+            coord = dico_coordSites[i] # We get its coordinate
+            print("HERE COME THE X", coord[0])
+            if coord[0] % 2 == 0 : # If the x component is even
+                diagonal_left_neighbor = [coord[0]+1, coord[1]-1] # we get the site in (x+1, y-1)
+                if diagonal_left_neighbor in dico_coordSites.values() : # if it exists
+                    Index_neighbor = List_values.index(diagonal_left_neighbor)
+                    Diagonal_edges.append([i, List_keys[Index_neighbor]])
 
-    #From this we build an adjacency dictionnary, which at each site makes correspond a list of neighbors
-    dico_neighborhood = {}
-    for i in range(nb_sites) :
-        dico_neighborhood[f"{i}"]= []
-        for pair in row_edges :
-            if i in pair :
-                paircopy = deepcopy(pair)
-                paircopy.remove(i)
-                dico_neighborhood[f"{i}"].append(paircopy[0])
-        for pair in col_edges :
-            if i in pair :
-                paircopy = deepcopy(pair)
-                paircopy.remove(i)
-                dico_neighborhood[f"{i}"].append(paircopy[0])
-        for pair in Diagonal_edges :
-            if i in pair :
-                paircopy = deepcopy(pair)
-                paircopy.remove(i)
-                dico_neighborhood[f"{i}"].append(paircopy[0])
+            if coord[0] % 2 != 0 : # If the x component is odd
+                diagonal_right_neighbor = [coord[0] + 1, coord[1] + 1]  # we get the site in (x+1, y-1)
+                if diagonal_right_neighbor in dico_coordSites.values():  # if it exists
+                    Index_neighbor = List_values.index(diagonal_right_neighbor)
+                    Diagonal_edges.append([i, List_keys[Index_neighbor]])
+
+        #From this we build an adjacency dictionnary, which at each site makes correspond a list of neighbors
+        dico_neighborhood = {}
+        for i in range(nb_sites) :
+            dico_neighborhood[f"{i}"]= []
+            for pair in row_edges :
+                if i in pair :
+                    paircopy = deepcopy(pair)
+                    paircopy.remove(i)
+                    dico_neighborhood[f"{i}"].append(paircopy[0])
+            for pair in col_edges :
+                if i in pair :
+                    paircopy = deepcopy(pair)
+                    paircopy.remove(i)
+                    dico_neighborhood[f"{i}"].append(paircopy[0])
+            for pair in Diagonal_edges :
+                if i in pair :
+                    paircopy = deepcopy(pair)
+                    paircopy.remove(i)
+                    dico_neighborhood[f"{i}"].append(paircopy[0])
+    else : print("ERROR : unable to build an",n,"by",p,"Network with", len(List_Sites),"objects")
     return dico_neighborhood
