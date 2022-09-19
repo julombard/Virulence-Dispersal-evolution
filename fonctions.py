@@ -31,12 +31,12 @@ def SetMetapop(nbsite, taillepop): #Creates sites objects containing populations
     ListSites=[] # List that will contain all sites
     for i in range(nbsite): # Creates sites, the 1st will always contain one infected and the other 0
         if i == 0:
-            newsite = classes.Site(effectifS=25, effectifI=13)
+            newsite = classes.Site(effectifS=30, effectifI=55)
             newsite.Index = i
             # Assign to each initialised infected individual a trait value for alpha
             for j in range(newsite.effectifI):
                 # newsite.traitvalues.append(float(np.random.uniform(0,1,1))) # For random sample from a given law, here uniform
-                sampled_trait = float(np.random.normal(0.15,0.02,1))
+                sampled_trait = float(np.random.normal(0.09,0.02,1))
                 print(sampled_trait, "COUCOU")
                 newsite.traitvalues.append(round(sampled_trait,2)) # For random sample from a given law, here normal
                 #newsite.traitvalues.append(0.15)  # For sampling from predefined trait vector
@@ -51,11 +51,11 @@ def SetMetapop(nbsite, taillepop): #Creates sites objects containing populations
             #newsite.betaI = GetBetaI(newsite.traitvalues)
             #ListSites.append(newsite)
         else:
-            newsite = classes.Site(effectifS=25, effectifI=13)
+            newsite = classes.Site(effectifS=30, effectifI=55)
             newsite.Index = i
             for j in range(newsite.effectifI):
                 #newsite.traitvalues.append(float(np.random.uniform(0,1,1)))
-                sampled_trait = float(np.random.normal(0.15, 0.02, 1))
+                sampled_trait = float(np.random.normal(0.09, 0.02, 1))
                 newsite.traitvalues.append(round(sampled_trait, 2))  # For random sample from a given law, here normal
                 #newsite.traitvalues.append(0.15)
             newsite.betaI = GetBetaI(newsite.traitvalues)

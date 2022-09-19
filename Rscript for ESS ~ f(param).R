@@ -25,7 +25,7 @@ MeanSimValue <- function(lsdf, var){ # return mean value for each time of a give
 
 BuildMeanSim <- function(lsdf){ # Build the mean dataframe from the whole set of simulations
   namecols<- names(lsdf[[1]])
-  MeanSim <- data.frame(matrix(ncol = length(namecols), nrow =length(lsdf[[1]]$t)))
+  MeanSim <- data.frame(matrix(ncol = length(namecols), nrow =length(lsdf[[1]]$Time)))
   colnames(MeanSim) <- namecols
   
   for (i in 1:length(namecols)){
@@ -50,13 +50,14 @@ TraitsFiles <- list()
 DistribFiles <- list()
 
 for (i in 1:length(listfiles)){
-  
+  i=1
   currentdir <- paste(dir, listfiles[i], sep = "\\") #Browse subfolders in main folders
   TraitsDir <- paste(currentdir, "Traits", sep = "\\") # Get the subsubfolder with traits files
   DensitiesDir <- paste(currentdir, "Densities", sep = "\\") # Get the subsubfolder with densities files
   DistribDir <- paste(currentdir, "Distributions", sep = "\\") # Get the subfolder for distribution of traits when discrete trait values are used
   
   cwd <- setwd(TraitsDir)
+  cwd
   
   ls_files_Traits <- list.files(TraitsDir) # list files
   list_tibbles_traits <- lapply(ls_files_Traits, read_csv) # Read CSV returns tibble object but i don't know how to deal with thoses guys so...
@@ -70,17 +71,15 @@ for (i in 1:length(listfiles)){
   for (i in 1:length(list_df_traits)){
     
     list_df_traits[[i]]<- subset(list_df_traits[[i]][c(-1)]) # suppress first column
-    list_df_traits[[i]]$t <- round(list_df_traits[[i]]$Time, 2) #round t values
-    
-    #Avoid duplicates
-    doubles <- which(duplicated(list_df_traits[[i]]$t))
-    list_df_traits[[i]] <- list_df_traits[[i]][-doubles,]
+    list_df_traits[[i]]$Time <- round(list_df_traits[[i]]$Time, 2) #round t values
+    list_df_traits[[i]] <- distinct(list_df_traits[[i]], Time, .keep_all = TRUE)
+ 
   }
   #Get only commons rows between all dataframes 
   #Get all t values
   t_values <- c(0)
   for (i in 1: length(list_df_traits)){
-    times <- list_df_traits[[i]]$t
+    times <- list_df_traits[[i]]$Time
     t_values <- c(t_values, times)
   }
   t_values <- t_values[-1] # Suppress the value given for initialization
@@ -89,16 +88,16 @@ for (i in 1:length(listfiles)){
   #Get values that appear nbsim times (common to every df)
   nbsim <- length(list_df_traits)
   tcommon<- counts$t_values[counts$Freq==nbsim] #Return the value of t that are common to every df
-  
+  tcommon
   #loop to keep only those t in the whole set of dfs
   for (i in 1:length(list_df_traits)){
-    indexrows <- which(list_df_traits[[i]]$t %in% tcommon)
+    indexrows <- which(list_df_traits[[i]]$Time %in% tcommon)
     list_df_traits[[i]] <- subset(list_df_traits[[i]][indexrows,])
   }
   
   # II. Building the mean simulation ( returns a single DataFrame)
   namecols<- names(list_df_traits[[1]])
-  MeanSim <- data.frame(matrix(ncol = length(namecols), nrow =length(list_df_traits[[1]]$t)))
+  MeanSim <- data.frame(matrix(ncol = length(namecols), nrow =length(list_df_traits[[1]]$Time)))
   colnames(MeanSim) <- namecols
   
   for (i in 1:length(namecols)){
@@ -124,19 +123,16 @@ for (i in 1:length(listfiles)){
   # I. Shaping dataframes and getting common rows
   
   for (i in 1:length(list_df_densities)){
-    
     list_df_densities[[i]]<- subset(list_df_densities[[i]][c(-1)]) # suppress first column
-    list_df_densities[[i]]$t <- round(list_df_densities[[i]]$t, 2) #round t values
-    
-    #Avoid duplicates
-    doubles <- which(duplicated(list_df_densities[[i]]$t))
-    list_df_densities[[i]] <- list_df_densities[[i]][-doubles,]
+    list_df_densities[[i]]$Time <- round(list_df_densities[[i]]$Time, 2) #round t values
+    list_df_densities[[i]] <- distinct(list_df_densities[[i]], Time, .keep_all = TRUE)#remove duplicates
+  
   }
   #Get only commons rows between all dataframes 
   #Get all t values
   t_values <- c(0)
   for (i in 1: length(list_df_densities)){
-    times <- list_df_densities[[i]]$t
+    times <- list_df_densities[[i]]$Time
     t_values <- c(t_values, times)
   }
   t_values <- t_values[-1] # Suppress the value given for initialization
@@ -148,13 +144,13 @@ for (i in 1:length(listfiles)){
   
   #loop to keep only those t in the whole set of dfs
   for (i in 1:length(list_df_densities)){
-    indexrows <- which(list_df_densities[[i]]$t %in% tcommon)
+    indexrows <- which(list_df_densities[[i]]$Time %in% tcommon)
     list_df_densities[[i]] <- subset(list_df_densities[[i]][indexrows,])
   }
   
   # II. Building the mean simulation ( returns a single DataFrame)
   namecols<- names(list_df_densities[[1]])
-  MeanSim2 <- data.frame(matrix(ncol = length(namecols), nrow =length(list_df_densities[[1]]$t)))
+  MeanSim2 <- data.frame(matrix(ncol = length(namecols), nrow =length(list_df_densities[[1]]$Time)))
   colnames(MeanSim2) <- namecols
   
   for (i in 1:length(namecols)){
@@ -182,17 +178,15 @@ for (i in 1:length(listfiles)){
   for (i in 1:length(list_df_Distributions)){
     
     list_df_Distributions[[i]]<- subset(list_df_Distributions[[i]][c(-1)]) # suppress first column
-    list_df_Distributions[[i]]$t <- round(list_df_Distributions[[i]]$Time, 2) #round t values
-    
-    #Avoid duplicates
-    doubles <- which(duplicated(list_df_Distributions[[i]]$t))
-    list_df_Distributions[[i]] <- list_df_Distributions[[i]][-doubles,]
+    list_df_Distributions[[i]]$Time <- round(list_df_Distributions[[i]]$Time, 2) #round t values
+    list_df_Distributions[[i]] <- distinct(list_df_Distributions[[i]], Time, .keep_all = TRUE) # remove duplicates
+  
   }
   #Get only commons rows between all dataframes 
   #Get all t values
   t_values <- c(0)
   for (i in 1: length(list_df_Distributions)){
-    times <- list_df_Distributions[[i]]$t
+    times <- list_df_Distributions[[i]]$Time
     t_values <- c(t_values, times)
   }
   t_values <- t_values[-1] # Suppress the value given for initialization
@@ -204,13 +198,13 @@ for (i in 1:length(listfiles)){
   
   #loop to keep only those t in the whole set of dfs
   for (i in 1:length(list_df_Distributions)){
-    indexrows <- which(list_df_Distributions[[i]]$t %in% tcommon)
+    indexrows <- which(list_df_Distributions[[i]]$Time %in% tcommon)
     list_df_Distributions[[i]] <- subset(list_df_Distributions[[i]][indexrows,])
   }
   
   # II. Building the mean simulation ( returns a single DataFrame)
   namecols<- names(list_df_Distributions[[1]])
-  MeanSim3 <- data.frame(matrix(ncol = length(namecols), nrow =length(list_df_Distributions[[1]]$t)))
+  MeanSim3 <- data.frame(matrix(ncol = length(namecols), nrow =length(list_df_Distributions[[1]]$Time)))
   colnames(MeanSim3) <- namecols
   
   for (i in 1:length(namecols)){
@@ -248,7 +242,7 @@ for (i in 1:length(DensitiesFiles)){
   Imean <- rowSums(Ipops)
   Nmean <- Smean + Imean
   
-  Metapop_Data <- data.frame(t = ActualDf$t, S = Smean, I=Imean, N = Nmean)
+  Metapop_Data <- data.frame(t = ActualDf$Time, S = Smean, I=Imean, N = Nmean)
   
   plot(Metapop_Data$t, Metapop_Data$S, type = 'l', col='blue', main = "Metapopulation dynamics", xlab = "t", ylab = "Densité", ylim = c(0,40000))
   lines(Metapop_Data$t,Metapop_Data$I, col = 'red')
@@ -258,7 +252,7 @@ for (i in 1:length(DensitiesFiles)){
   
   ###### Phase Space #####
   #Select only equilibrium values
-  #plot(Metapop_Data$S, Metapop_Data$I, type = 'l', xlab = 'Susceptibles', ylab = 'Infected')
+  plot(Metapop_Data$S, Metapop_Data$I, type = 'l', xlab = 'Susceptibles', ylab = 'Infected')
 }
 
 
@@ -279,11 +273,11 @@ Smean <- rowSums(Spops)
 Imean <- rowSums(Ipops)
 Nmean <- Smean + Imean
 
-Metapop_Data <- data.frame(t = ActualDf$t, S = Smean, I=Imean, N = Nmean)
+Metapop_Data <- data.frame(t = ActualDf$Time, S = Smean, I=Imean, N = Nmean)
 plot(Metapop_Data$t, Metapop_Data$N, type = 'l', col=1, main = "Metapopulation dynamics", xlab = "t", ylab = "Densité", ylim = c(0,40000))
 
 
-for (i in 2:length(DensitiesFiles)){
+for (i in 1:length(DensitiesFiles)){
   
   ActualDf <- DensitiesFiles[[i]]
   
@@ -301,7 +295,7 @@ for (i in 2:length(DensitiesFiles)){
   Imean <- rowSums(Ipops)
   Nmean <- Smean + Imean
   
-  Metapop_Data <- data.frame(t = ActualDf$t, S = Smean, I=Imean, N = Nmean)
+  Metapop_Data <- data.frame(t = ActualDf$Time, S = Smean, I=Imean, N = Nmean)
   lines(Metapop_Data$t, Metapop_Data$N, col = i)
 
 
@@ -323,11 +317,11 @@ Ipops <- subset(ActualDf[generate_odd_indexes])
 # We sum by lines to get global densities
 Smean <- rowSums(Spops)
 
-Metapop_Data <- data.frame(t = ActualDf$t, S = Smean)
+Metapop_Data <- data.frame(t = ActualDf$Time, S = Smean)
 plot(Metapop_Data$t, Metapop_Data$S, type = 'l', col=1, main = "Metapopulation dynamics", xlab = "t", ylab = "Densité", ylim = c(0,40000))
 
 
-for (i in 2:length(DensitiesFiles)){
+for (i in 1:length(DensitiesFiles)){
   
   ActualDf <- DensitiesFiles[[i]]
   
@@ -345,7 +339,7 @@ for (i in 2:length(DensitiesFiles)){
   Imean <- rowSums(Ipops)
   Nmean <- Smean + Imean
   
-  Metapop_Data <- data.frame(t = ActualDf$t, S = Smean)
+  Metapop_Data <- data.frame(t = ActualDf$Time, S = Smean)
   lines(Metapop_Data$t, Metapop_Data$S, col = i)
   
   
@@ -371,7 +365,7 @@ Imean <- rowSums(Ipops)
 Nmean <- Smean + Imean
 Ifrac <- Imean / Nmean
 
-Metapop_Data <- data.frame(t = ActualDf$t, S = Smean, I=Ifrac, N = Nmean)
+Metapop_Data <- data.frame(t = ActualDf$Time, S = Smean, I=Ifrac, N = Nmean)
 plot(Metapop_Data$t, Metapop_Data$I, type = 'l', col=1, main = "Metapopulation dynamics", xlab = "t", ylab = "Fraction I", ylim = c(0,1))
 
 
@@ -394,7 +388,7 @@ for (i in 2:length(DensitiesFiles)){
   Nmean <- Smean + Imean
   Ifrac <- Imean / Nmean
   
-  Metapop_Data <- data.frame(t = ActualDf$t, I=Ifrac)
+  Metapop_Data <- data.frame(t = ActualDf$Time, I=Ifrac)
   lines(Metapop_Data$t, Metapop_Data$I, col = i)
   
   
@@ -411,16 +405,17 @@ ConvergeValues <- c()
 
 for (i in 1:length(TraitsFiles)){
   
-  ActualDf <- TraitsFiles[[i]]
-  DeuxDf <- TraitsFiles[[i]] # ?
+  ActualDf <- TraitsFiles[[1]]
   
-  Nbsites <- length(ActualDf)-1
-  SitesValues <- subset(ActualDf[c(-1)])
-  MeanValues <- rowSums(SitesValues, na.rm = T)/Nbsites
-  taillemax <- length(MeanValues)
+  Nbsites <- length(ActualDf)-2
+  SitesValues <- subset(ActualDf[c(-1)]) # suppres weird column ?
+  FinalValues <- subset(SitesValues[c(-1)]) # supress time column
+  FinalValues[FinalValues==0] <- NA # Replaces zeros by NAs
+  MeanValues <- rowSums(FinalValues, na.rm = T)
+  
   ConvergeValue <- MeanValues[taillemax]
   ConvergeValues <- c(ConvergeValues, ConvergeValue)
-  plot(ActualDf$t, MeanValues, type = 'l', xlab = 'time', ylab = 'Mean Trait Value')
+  plot(ActualDf$Time, MeanValues, type = 'l', xlab = 'time', ylab = 'Mean Trait Value')
   
 
   
@@ -433,7 +428,7 @@ Nbsites <- length(TraitsFiles[[1]])-1
 SitesValues <- subset(TraitsFiles[[1]][c(-1)])
 MeanValues <- rowSums(SitesValues, na.rm = T)/Nbsites
 
-plot(TraitsFiles[[1]]$t, MeanValues, type = 'l',xlab = 'time', ylab = 'Mean Trait Value', ylim = c(0,1.2))
+plot(TraitsFiles[[1]]$Time, MeanValues, type = 'l',xlab = 'time', ylab = 'Mean Trait Value', ylim = c(0,1.2))
 
 for (i in 1:length(TraitsFiles)-1){
   
@@ -445,7 +440,7 @@ for (i in 1:length(TraitsFiles)-1){
   taillemax <- length(MeanValues)
   ConvergeValue <- MeanValues[taillemax]
   ConvergeValues <- c(ConvergeValues, ConvergeValue)
-  lines(ActualDf$t, MeanValues, type = 'l', xlab = 'time', ylab = 'Mean Trait Value', col = i)
+  lines(ActualDf$Time, MeanValues, type = 'l', xlab = 'time', ylab = 'Mean Trait Value', col = i)
   
   
   
@@ -463,7 +458,7 @@ for (i in 1:length(TraitsFiles)){
   
   Nbsites <- length(ActualDf)-1
   
-  LastValues<- subset(ActualDf, ActualDf$t > 120)
+  LastValues<- subset(ActualDf, ActualDf$Time > 120)
   SitesValues <- subset(LastValues[c(-1)])
   
   RowMeanValues <- rowMeans(SitesValues, na.rm = T) # Fait la moyenne des lignes
@@ -487,17 +482,20 @@ plot(dvalues, ConvergeValues, xlab = 'e', ylab='Stable Value', col = 'red', pch 
 
 for ( i in 1:length(DistribFiles)){
   
+  DistribFiles[[1]]
   ActualDf <- DistribFiles[[1]]
-
-  time <- as.vector(ActualDf$t)
-  alpha <- seq(0.01,3,0.1)
-  Densities <- as.matrix(subset(ActualDf[,-1]))
+  todrop <- c('Time','t')
+  df2 <- ActualDf[,!(names(ActualDf) %in% todrop)]
+  FinalDf <- subset(df2[c(-1)])
+  time <- as.vector(ActualDf$ime)
+  alpha <- seq(0.0,1.45,0.05)
+  Densities <- as.matrix(subset(FinalDf[,-1]))
   Densities
   colnames(Densities) <- NULL
 
-  fig <- plot_ly(z = ~Densities, type = "heatmap")%>%layout(title = 'Phenotypic Distribution dynamics, d=0.95', plot_bgcolor = "#e5ecf6", xaxis = list(title = 'Alpha'), 
+  fig <- plot_ly( x = alpha, y = time,z = ~Densities, type = "heatmap")%>%layout(title = 'Phenotypic Distribution dynamics, d=0.5', plot_bgcolor = "#e5ecf6", xaxis = list(title = 'Alpha'), 
                                          
-                                         yaxis = list(title = 'Time'),zaxis = list(title = "Density"), legend = list(title=list(text='<b> What is that ? </b>')))
+                                         yaxis = list( title = 'Time'),zaxis = list(range = c(0,6000),title = "Density"), legend = list(title=list(text='<b> What is that ? </b>')))
 
   plotly_build(fig)
 

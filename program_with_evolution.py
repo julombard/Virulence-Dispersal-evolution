@@ -37,11 +37,11 @@ def RunModel(seed, param, Sp_config) :
     nb_iterations = 0 # Store the number of interations, used to define times that are saved (later)
     sim_time = 0 # Simulation time (model time, not an iteration number)
     vectime = [0] # to keep track of t variable
-    tmax = 6000 # Ending time
+    tmax = 10 # Ending time
     Nexactsteps = 20  # Number of steps to do if/when performing direct method (USELESS IF nbsite > 20~30)
-    nbsite = 49 # Number of sites
-    n = 7 #Number of rows  for lattices configurations
-    p= 7 # Number of columns for lattices configurations
+    nbsite = 64 # Number of sites
+    n = 8 #Number of rows  for lattices configurations
+    p= 8 # Number of columns for lattices configurations
     Taillepop = Params.k # Initial local population sizes
     Evoltrait = classes.EvolvingTrait('alpha', True) # Define the trait that will evolve in the simulation (only alpha availables for now)
 
@@ -65,7 +65,7 @@ def RunModel(seed, param, Sp_config) :
         Hastable_adjacency = NetworkFunctions.Build_Hexagonal_Lattice(n,p,ListSites) # n the number or row desired (int), p the number of columns (int) , ListSite a list of site objects
 
      #Gives adjacency lists
-    print(Hastable_adjacency)
+    #print(Hastable_adjacency)
 
     #EVENT DEFINITIONS
     ReproductionS = classes.Event(name='Reproduction S',propensity='(bi - omega * (self.S+self.I) ) * self.S', Schange='1', Ichange='0', order=1,EvolvingTrait=Evoltrait)
@@ -105,7 +105,7 @@ def RunModel(seed, param, Sp_config) :
     ############################# MODEL MAIN LOOP ########################################
     while sim_time < tmax :
         #DEFINE HOW MUCH YOU LIKE TO SAVE DATAS
-        if nb_iterations % 10 == 0: # % x => we save each x times
+        if nb_iterations % 20 == 0: # % x => we save each x times
             vectime.append(sim_time) # Update time vector
 
         #COMPUTE PROPENSITIES
@@ -322,22 +322,22 @@ def RunModel(seed, param, Sp_config) :
     datadensity = pd.DataFrame.from_dict(data=dico_densities_df)
     VectimeDf = pd.DataFrame(data=vectime)
     datadensity.insert(0, "Time", VectimeDf, allow_duplicates=False)
-    datadensity.to_csv('Metapop_Outputs_Branch_regular_t6000' + str(d) + '_' + str(seed) + '.csv')
+    datadensity.to_csv('Metapop_Outputs_WHEREAREYOU' + str(d) + '_' + str(seed) + '.csv')
     #MEAN TRAITS TIME SERIES
     datatrait = pd.DataFrame.from_dict(data=dico_traits_df)
     datatrait.insert(0, 'Time', VectimeDf, allow_duplicates=False)
-    datatrait.to_csv('Traits_outputs_Branch_regular_t6000' + str(d) + '_' + str(seed) + '.csv')
+    datatrait.to_csv('Traits_outputsTESTESTE_WHEREAREYOU' + str(d) + '_' + str(seed) + '.csv')
     #JUST THE TRAITS TIME SERIES
     datadistrib = pd.DataFrame.from_dict(data=dico_distrib_df)
     datadistrib.insert(0, 'Time', VectimeDf, allow_duplicates=False)
-    datadistrib.to_csv('Distribution_outputs_Branch_regular_t6000' + str(d) + '_' + str(seed) + '.csv')
+    datadistrib.to_csv('Distribution_outputsTESTESTE_WHEREAREYOU' + str(d) + '_' + str(seed) + '.csv')
 
 ################## MULTIPROCESSING PART ################
 
 # Multiprocessing parameters
-list_seeds = [1,2,3,4,5,6] # The list of seed you want to test
+list_seeds = [1] # The list of seed you want to test
 list_params =[0.5] # The list of params values you want to test (has to be changed also at the begining)
-list_config =["Hexagonal lattice"]
+list_config =["Island"]
 nbsims = len(list_seeds)
 
 #Launch a batch of nbsims simulations
@@ -350,7 +350,7 @@ if __name__ == '__main__':
     for j in range(len(list_params)) :
         for i in range(nbsims):
             #Switch the two following lines to enable/disable multisim
-            #pool.apply_async(RunModel, args=(list_seeds[i],list_params[j], list_config[j])) #Launch multisim
-            RunModel(list_seeds[i],list_params[j], list_config[j]) #Launch without multisim (restores errors messages)
+            pool.apply_async(RunModel, args=(list_seeds[i],list_params[j], list_config[j])) #Launch multisim
+            #RunModel(list_seeds[i],list_params[j], list_config[j]) #Launch without multisim (restores errors messages)
     pool.close() # Mandatory
     pool.join() # Idem
