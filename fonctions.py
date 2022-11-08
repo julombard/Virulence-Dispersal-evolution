@@ -18,7 +18,7 @@ epsilon = Params.epsilon  # Extinction rate
 
 ### FOR VIRULENCE EVOLUTION, WE STATE HERE THE RANGE OF VIRULENCE VALUES THAT CAN BE TAKEN
 
-Possible_alpha_values = list(np.arange(0,1, 0.01)) # Here we get values from 1st to 2nd by 3rd
+Possible_alpha_values = list(np.arange(0.01, 0.5, 0.01)) # Here we get values from 1st to 2nd by 3rd
 Rounded_alpha_values = []
 for i in Possible_alpha_values :
     Rounded_alpha_values.append(round(i,2))
@@ -36,10 +36,10 @@ def SetMetapop(nbsite, taillepop): #Creates sites objects containing populations
             # Assign to each initialised infected individual a trait value for alpha
             for j in range(newsite.effectifI):
                 # newsite.traitvalues.append(float(np.random.uniform(0,1,1))) # For random sample from a given law, here uniform
-                sampled_trait = float(np.random.normal(0.09,0.02,1))
-                print(sampled_trait, "COUCOU")
-                newsite.traitvalues.append(round(sampled_trait,2)) # For random sample from a given law, here normal
-                #newsite.traitvalues.append(0.15)  # For sampling from predefined trait vector
+                #sampled_trait = float(np.random.normal(0.09,0.02,1))
+                #print(sampled_trait, "COUCOU")
+                #newsite.traitvalues.append(round(sampled_trait,2)) # For random sample from a given law, here normal
+                newsite.traitvalues.append(0.25)  # For sampling from predefined trait vector
             newsite.betaI = GetBetaI(newsite.traitvalues)
             #ListSites.append(newsite)
         #elif i == 1:
@@ -55,9 +55,9 @@ def SetMetapop(nbsite, taillepop): #Creates sites objects containing populations
             newsite.Index = i
             for j in range(newsite.effectifI):
                 #newsite.traitvalues.append(float(np.random.uniform(0,1,1)))
-                sampled_trait = float(np.random.normal(0.09, 0.02, 1))
-                newsite.traitvalues.append(round(sampled_trait, 2))  # For random sample from a given law, here normal
-                #newsite.traitvalues.append(0.15)
+                #sampled_trait = float(np.random.normal(0.09, 0.02, 1))
+                #newsite.traitvalues.append(round(sampled_trait, 2))  # For random sample from a given law, here normal
+                newsite.traitvalues.append(0.25)
             newsite.betaI = GetBetaI(newsite.traitvalues)
         ListSites.append(newsite)
     return ListSites
@@ -349,7 +349,7 @@ def ChooseTraitValue(EvolvingTrait,NbTrigger,Statechange, Traitvalues, BetaI) : 
         if newtraitsvalues : # If the trait values vector is not empty (important : random sampling can't occur in empty objects)
             if Statechange > 0:  # If it's a birth
                 if EvolvingTrait.TraitMutation == True : # If Mutation is allowed in simulation
-                    probamut = 0.0001 # We set a mutation probability (à passer en param global ou en attribut de classe)
+                    probamut = 0.001 # We set a mutation probability (à passer en param global ou en attribut de classe)
                     roll2mutate = np.random.uniform(0,1,1)
                     if roll2mutate < probamut : #Here there is mutation
                         #Newalpha = float(np.random.uniform(0,1,1)) # sample the new alpha value

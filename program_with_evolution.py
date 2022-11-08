@@ -1,4 +1,5 @@
 # STOCHASTIC SIMULATION ALGORITHM FOR EVOLUTION IN SIR METAPOPULATION
+import os
 from copy import deepcopy
 import NetworkFunctions
 import classes
@@ -23,10 +24,10 @@ alpha = Params.alpha  # Parasite Virulence
 rho = Params.rho  # Dispersal Cost
 epsilon = Params.epsilon  # Extinction rate
 
-def RunModel(seed, param, Sp_config) :
+def RunModel(seed, param) :
 
     #SIMULATION PARAMETERS
-
+    Sp_config = "Island"
     # This part changes parameters (here d) values for multisim runs where numerous are tested
     d = param
     classes.d = param
@@ -37,11 +38,11 @@ def RunModel(seed, param, Sp_config) :
     nb_iterations = 0 # Store the number of interations, used to define times that are saved (later)
     sim_time = 0 # Simulation time (model time, not an iteration number)
     vectime = [0] # to keep track of t variable
-    tmax = 10 # Ending time
+    tmax = 2000 # Ending time
     Nexactsteps = 20  # Number of steps to do if/when performing direct method (USELESS IF nbsite > 20~30)
-    nbsite = 64 # Number of sites
-    n = 8 #Number of rows  for lattices configurations
-    p= 8 # Number of columns for lattices configurations
+    nbsite = 80 # Number of sites
+    n = 7 #Number of rows  for lattices configurations
+    p= 7 # Number of columns for lattices configurations
     Taillepop = Params.k # Initial local population sizes
     Evoltrait = classes.EvolvingTrait('alpha', True) # Define the trait that will evolve in the simulation (only alpha availables for now)
 
@@ -105,7 +106,7 @@ def RunModel(seed, param, Sp_config) :
     ############################# MODEL MAIN LOOP ########################################
     while sim_time < tmax :
         #DEFINE HOW MUCH YOU LIKE TO SAVE DATAS
-        if nb_iterations % 20 == 0: # % x => we save each x times
+        if nb_iterations % 15 == 0: # % x => we save each x times
             vectime.append(sim_time) # Update time vector
 
         #COMPUTE PROPENSITIES
@@ -264,12 +265,12 @@ def RunModel(seed, param, Sp_config) :
         for index, i in enumerate(ListSites):
             if i.effectifS < 0:  # Avoid negative population in the "big fat brute" way
                 i.effectifS = 0
-            if nb_iterations % 10 == 0 :
+            if nb_iterations % 15 == 0 :
                 dico_densities_df[f"S{index}"].append(i.effectifS)
             indexlist += 1
             if i.effectifI < 0:
                 i.effectifI = 0
-            if nb_iterations % 10 == 0:
+            if nb_iterations % 15 == 0:
                 dico_densities_df[f"I{index}"].append(i.effectifI)
             indexlist += 1
         #2. Propensities
@@ -284,19 +285,19 @@ def RunModel(seed, param, Sp_config) :
             if i.effectifI > 0:
                 SumTraitValues = sum(i.traitvalues)
                 MeanTraitValue = SumTraitValues / i.effectifI
-                if nb_iterations % 10 == 0:
+                if nb_iterations % 15 == 0:
                     dico_traits_df[f"site{index}"].append(MeanTraitValue)
                 indexlist2 += 1
             else:
                 MeanTraitValue = 'NA'
                 list_value.append(MeanTraitValue)
-                if nb_iterations % 10 == 0:
+                if nb_iterations % 15 == 0:
                     dico_traits_df[f"site{index}"].append(MeanTraitValue)
         # 4 Count the different phenotypes in the metapopulation, in order to follow their distribution over time
         Possible_values = fonctions.Rounded_alpha_values
         for i in Possible_values:  # For each value defined
             count = 0
-            if nb_iterations % 10 == 0:
+            if nb_iterations % 15 == 0:
                 for j in ListSites:  # We browse the different sites
                     # We count the given value and sum it
                     count += j.traitvalues.count(i)
@@ -322,22 +323,22 @@ def RunModel(seed, param, Sp_config) :
     datadensity = pd.DataFrame.from_dict(data=dico_densities_df)
     VectimeDf = pd.DataFrame(data=vectime)
     datadensity.insert(0, "Time", VectimeDf, allow_duplicates=False)
-    datadensity.to_csv('Metapop_Outputs_WHEREAREYOU' + str(d) + '_' + str(seed) + '.csv')
+    datadensity.to_csv('Metapop_outputs_ESSfigure_0811' + str(d) + '_' + str(seed) + '.csv')
     #MEAN TRAITS TIME SERIES
     datatrait = pd.DataFrame.from_dict(data=dico_traits_df)
     datatrait.insert(0, 'Time', VectimeDf, allow_duplicates=False)
-    datatrait.to_csv('Traits_outputsTESTESTE_WHEREAREYOU' + str(d) + '_' + str(seed) + '.csv')
+    datatrait.to_csv('Traits_outputs_ESSfigure_0811' + str(d) + '_' + str(seed) + '.csv')
     #JUST THE TRAITS TIME SERIES
     datadistrib = pd.DataFrame.from_dict(data=dico_distrib_df)
     datadistrib.insert(0, 'Time', VectimeDf, allow_duplicates=False)
-    datadistrib.to_csv('Distribution_outputsTESTESTE_WHEREAREYOU' + str(d) + '_' + str(seed) + '.csv')
+    datadistrib.to_csv('Distribution_outputs_ESSfigure_0811' + str(d) + '_' + str(seed) + '.csv')
 
 ################## MULTIPROCESSING PART ################
 
 # Multiprocessing parameters
-list_seeds = [1] # The list of seed you want to test
-list_params =[0.5] # The list of params values you want to test (has to be changed also at the begining)
-list_config =["Island"]
+list_seeds = [1,2,3,4,5,6, 7,8,9,10,11,12] # The list of seed you want to test
+list_params =[0.1] # The list of params values you want to test (has to be changed also at the begining)
+#list_config =["Island"]
 nbsims = len(list_seeds)
 
 #Launch a batch of nbsims simulations
@@ -350,7 +351,7 @@ if __name__ == '__main__':
     for j in range(len(list_params)) :
         for i in range(nbsims):
             #Switch the two following lines to enable/disable multisim
-            pool.apply_async(RunModel, args=(list_seeds[i],list_params[j], list_config[j])) #Launch multisim
-            #RunModel(list_seeds[i],list_params[j], list_config[j]) #Launch without multisim (restores errors messages)
+            pool.apply_async(RunModel, args=(list_seeds[i],list_params[j])) #Launch multisim
+            #RunModel(list_seeds[i],list_params[j]) #Launch without multisim (restores errors messages)
     pool.close() # Mandatory
     pool.join() # Idem
