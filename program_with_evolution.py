@@ -38,7 +38,7 @@ def RunModel(seed, param) :
     nb_iterations = 0 # Store the number of interations, used to define times that are saved (later)
     sim_time = 0 # Simulation time (model time, not an iteration number)
     vectime = [0] # to keep track of t variable
-    tmax = 2000 # Ending time
+    tmax = 5000 # Ending time
     Nexactsteps = 20  # Number of steps to do if/when performing direct method (USELESS IF nbsite > 20~30)
     nbsite = 80 # Number of sites
     n = 7 #Number of rows  for lattices configurations
@@ -106,7 +106,7 @@ def RunModel(seed, param) :
     ############################# MODEL MAIN LOOP ########################################
     while sim_time < tmax :
         #DEFINE HOW MUCH YOU LIKE TO SAVE DATAS
-        if nb_iterations % 15 == 0: # % x => we save each x times
+        if nb_iterations % 20 == 0: # % x => we save each x times
             vectime.append(sim_time) # Update time vector
 
         #COMPUTE PROPENSITIES
@@ -265,12 +265,12 @@ def RunModel(seed, param) :
         for index, i in enumerate(ListSites):
             if i.effectifS < 0:  # Avoid negative population in the "big fat brute" way
                 i.effectifS = 0
-            if nb_iterations % 15 == 0 :
+            if nb_iterations % 20 == 0 :
                 dico_densities_df[f"S{index}"].append(i.effectifS)
             indexlist += 1
             if i.effectifI < 0:
                 i.effectifI = 0
-            if nb_iterations % 15 == 0:
+            if nb_iterations % 20 == 0:
                 dico_densities_df[f"I{index}"].append(i.effectifI)
             indexlist += 1
         #2. Propensities
@@ -285,19 +285,19 @@ def RunModel(seed, param) :
             if i.effectifI > 0:
                 SumTraitValues = sum(i.traitvalues)
                 MeanTraitValue = SumTraitValues / i.effectifI
-                if nb_iterations % 15 == 0:
+                if nb_iterations % 20 == 0:
                     dico_traits_df[f"site{index}"].append(MeanTraitValue)
                 indexlist2 += 1
             else:
                 MeanTraitValue = 'NA'
                 list_value.append(MeanTraitValue)
-                if nb_iterations % 15 == 0:
+                if nb_iterations % 20 == 0:
                     dico_traits_df[f"site{index}"].append(MeanTraitValue)
         # 4 Count the different phenotypes in the metapopulation, in order to follow their distribution over time
         Possible_values = fonctions.Rounded_alpha_values
         for i in Possible_values:  # For each value defined
             count = 0
-            if nb_iterations % 15 == 0:
+            if nb_iterations % 20 == 0:
                 for j in ListSites:  # We browse the different sites
                     # We count the given value and sum it
                     count += j.traitvalues.count(i)
@@ -323,21 +323,22 @@ def RunModel(seed, param) :
     datadensity = pd.DataFrame.from_dict(data=dico_densities_df)
     VectimeDf = pd.DataFrame(data=vectime)
     datadensity.insert(0, "Time", VectimeDf, allow_duplicates=False)
-    datadensity.to_csv('Metapop_outputs_ESSfigure_0811' + str(d) + '_' + str(seed) + '.csv')
+    datadensity.to_csv('Metapop_outputs_1602_' + str(d) + '_' + str(seed) + '.csv')
     #MEAN TRAITS TIME SERIES
     datatrait = pd.DataFrame.from_dict(data=dico_traits_df)
     datatrait.insert(0, 'Time', VectimeDf, allow_duplicates=False)
-    datatrait.to_csv('Traits_outputs_ESSfigure_0811' + str(d) + '_' + str(seed) + '.csv')
+    datatrait.to_csv('Traits_outputs_1602_' + str(d) + '_' + str(seed) + '.csv')
     #JUST THE TRAITS TIME SERIES
     datadistrib = pd.DataFrame.from_dict(data=dico_distrib_df)
     datadistrib.insert(0, 'Time', VectimeDf, allow_duplicates=False)
-    datadistrib.to_csv('Distribution_outputs_ESSfigure_0811' + str(d) + '_' + str(seed) + '.csv')
+    datadistrib.to_csv('Distribution_outputs_1602_' + str(d) + '_' + str(seed) + '.csv')
 
 ################## MULTIPROCESSING PART ################
 
 # Multiprocessing parameters
-list_seeds = [1,2,3,4,5,6, 7,8,9,10,11,12] # The list of seed you want to test
-list_params =[0.1] # The list of params values you want to test (has to be changed also at the begining)
+list_seeds = [1,2,3,4,5,6,7,8,9,10] # The list of seed you want to test
+list_params =[0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1] # The list of params values you want to test (has to be changed also at the begining)
+#,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1
 #list_config =["Island"]
 nbsims = len(list_seeds)
 
@@ -345,7 +346,7 @@ nbsims = len(list_seeds)
 # WARNING : MULTISIM MAKES ERROR MESSAGES VANISH
 if __name__ == '__main__':
     multiprocessing.freeze_support()
-    CPUnb=multiprocessing.cpu_count()-2 #Number of CPU, minus 2 by precaution. And to be able to do things meanwhile
+    CPUnb=multiprocessing.cpu_count()-1 #Number of CPU, minus 2 by precaution. And to be able to do things meanwhile
     print('nb CPU: '+str(CPUnb))
     pool = multiprocessing.Pool(processes=CPUnb) #I don't know what that is doing exactly, but it is necessary.
     for j in range(len(list_params)) :

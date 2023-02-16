@@ -31,7 +31,7 @@ def SetMetapop(nbsite, taillepop): #Creates sites objects containing populations
     ListSites=[] # List that will contain all sites
     for i in range(nbsite): # Creates sites, the 1st will always contain one infected and the other 0
         if i == 0:
-            newsite = classes.Site(effectifS=30, effectifI=55)
+            newsite = classes.Site(effectifS=400, effectifI=100)
             newsite.Index = i
             # Assign to each initialised infected individual a trait value for alpha
             for j in range(newsite.effectifI):
@@ -39,7 +39,7 @@ def SetMetapop(nbsite, taillepop): #Creates sites objects containing populations
                 #sampled_trait = float(np.random.normal(0.09,0.02,1))
                 #print(sampled_trait, "COUCOU")
                 #newsite.traitvalues.append(round(sampled_trait,2)) # For random sample from a given law, here normal
-                newsite.traitvalues.append(0.25)  # For sampling from predefined trait vector
+                newsite.traitvalues.append(0.3)  # For sampling from predefined trait vector
             newsite.betaI = GetBetaI(newsite.traitvalues)
             #ListSites.append(newsite)
         #elif i == 1:
@@ -51,13 +51,13 @@ def SetMetapop(nbsite, taillepop): #Creates sites objects containing populations
             #newsite.betaI = GetBetaI(newsite.traitvalues)
             #ListSites.append(newsite)
         else:
-            newsite = classes.Site(effectifS=30, effectifI=55)
+            newsite = classes.Site(effectifS=400, effectifI=100)
             newsite.Index = i
             for j in range(newsite.effectifI):
                 #newsite.traitvalues.append(float(np.random.uniform(0,1,1)))
                 #sampled_trait = float(np.random.normal(0.09, 0.02, 1))
                 #newsite.traitvalues.append(round(sampled_trait, 2))  # For random sample from a given law, here normal
-                newsite.traitvalues.append(0.25)
+                newsite.traitvalues.append(0.3)
             newsite.betaI = GetBetaI(newsite.traitvalues)
         ListSites.append(newsite)
     return ListSites
@@ -367,7 +367,9 @@ def ChooseTraitValue(EvolvingTrait,NbTrigger,Statechange, Traitvalues, BetaI) : 
 
                         Parent_Value = newtraitsvalues[Index_reproducer] # We get the trait value of the parent
 
-                        Value_postmut = float(np.random.normal(Parent_Value, 0.02, 1))
+                        Value_postmut = float(np.random.normal(Parent_Value, 0.01, 1))
+                        if Value_postmut < 0 :
+                            Value_postmut = 0
                         NewValue = round(Value_postmut, 2)
 
                         #ChangeMut = [-0.01,0.01]
