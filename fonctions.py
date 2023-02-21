@@ -39,7 +39,7 @@ def SetMetapop(nbsite, taillepop): #Creates sites objects containing populations
                 #sampled_trait = float(np.random.normal(0.09,0.02,1))
                 #print(sampled_trait, "COUCOU")
                 #newsite.traitvalues.append(round(sampled_trait,2)) # For random sample from a given law, here normal
-                newsite.traitvalues.append(0.3)  # For sampling from predefined trait vector
+                newsite.traitvalues.append(0.2)  # For sampling from predefined trait vector
             newsite.betaI = GetBetaI(newsite.traitvalues)
             #ListSites.append(newsite)
         #elif i == 1:
@@ -57,7 +57,7 @@ def SetMetapop(nbsite, taillepop): #Creates sites objects containing populations
                 #newsite.traitvalues.append(float(np.random.uniform(0,1,1)))
                 #sampled_trait = float(np.random.normal(0.09, 0.02, 1))
                 #newsite.traitvalues.append(round(sampled_trait, 2))  # For random sample from a given law, here normal
-                newsite.traitvalues.append(0.3)
+                newsite.traitvalues.append(0.2)
             newsite.betaI = GetBetaI(newsite.traitvalues)
         ListSites.append(newsite)
     return ListSites
@@ -368,8 +368,8 @@ def ChooseTraitValue(EvolvingTrait,NbTrigger,Statechange, Traitvalues, BetaI) : 
                         Parent_Value = newtraitsvalues[Index_reproducer] # We get the trait value of the parent
 
                         Value_postmut = float(np.random.normal(Parent_Value, 0.01, 1))
-                        if Value_postmut < 0 :
-                            Value_postmut = 0
+                        if Value_postmut <= 0 :
+                            Value_postmut = 0.01
                         NewValue = round(Value_postmut, 2)
 
                         #ChangeMut = [-0.01,0.01]
